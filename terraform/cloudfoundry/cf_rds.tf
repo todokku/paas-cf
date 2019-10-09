@@ -35,16 +35,22 @@ resource "aws_db_parameter_group" "cf_pg_9_5" {
   description = "RDS CF Postgres 9.5 parameter group"
 }
 
+resource "aws_db_parameter_group" "cf_pg_11" {
+  name        = "${var.env}-pg11-cf"
+  family      = "postgres11"
+  description = "RDS Postgres 11 default parameter group"
+}
+
 resource "aws_db_instance" "cf" {
   identifier           = "${var.env}-cf"
   allocated_storage    = 100
   engine               = "postgres"
-  engine_version       = "9.5"
+  engine_version       = "11.1"
   instance_class       = "${var.cf_db_instance_type}"
   username             = "dbadmin"
   password             = "${var.secrets_cf_db_master_password}"
   db_subnet_group_name = "${aws_db_subnet_group.cf_rds.name}"
-  parameter_group_name = "${aws_db_parameter_group.cf_pg_9_5.id}"
+  parameter_group_name = "${aws_db_parameter_group.cf_pg_11.id}"
 
   storage_type               = "gp2"
   backup_window              = "02:00-03:00"
