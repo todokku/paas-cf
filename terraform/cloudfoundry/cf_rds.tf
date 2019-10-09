@@ -45,7 +45,7 @@ resource "aws_db_instance" "cf" {
   identifier           = "${var.env}-cf"
   allocated_storage    = 100
   engine               = "postgres"
-  engine_version       = "11.1"
+  engine_version       = "11.5"
   instance_class       = "${var.cf_db_instance_type}"
   username             = "dbadmin"
   password             = "${var.secrets_cf_db_master_password}"
@@ -61,6 +61,8 @@ resource "aws_db_instance" "cf" {
   skip_final_snapshot        = "${var.cf_db_skip_final_snapshot}"
   vpc_security_group_ids     = ["${aws_security_group.cf_rds.id}"]
   auto_minor_version_upgrade = true
+  allow_major_version_upgrade = true
+  apply_immediately           = true
 
   tags {
     Name       = "${var.env}-cf"
