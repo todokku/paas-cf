@@ -105,6 +105,91 @@
         "valueName": "avg"
       },
       {
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorPostfix": false,
+        "colorValue": false,
+        "colors": [
+          "#d44a3a",
+          "#ff780a",
+          "#299c46"
+        ],
+        "decimals": 3,
+        "format": "percent",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 6,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "pluginVersion": "6.1.4",
+        "postfix": " Seconds over the last 30 days",
+        "postfixFontSize": "50%",
+        "prefix": "Billing API Response time",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "expr": "avg(avg_over_time(paas_billing_api_performance_elapsed_seconds{message=\"paas-billing.store.get-billable-event-rows-query\"}[30d]))",
+            "format": "time_series",
+            "instant": true,
+            "intervalFactor": 1,
+            "refId": "A"
+          }
+        ],
+        "thresholds": "0.80,1.0",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Average Billing API response",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "avg"
+      },
+      {
         "content": "## About this dashboard\n\nWe've decided to measure \"uptime\" based on metrics from the CloudFront CDN. CloudFront sits on the outside the platform, so any errors due to the platform will be seen in the cloud front metrics.\n\nAt the time of writing there are about 40 CloudFront CDNs on the platform (across London and Ireland). They cover both production and non-production services.\n\nOur SLI should not be affected if a few services have high error rates - this probably indicates an issue with the individual applications.\nIf a large number of services have high error rates at the same time we should assume there's a problem with the platform.\n\nInitially our application uptime SLI is:\n\n```\nThe average (mean) percentage of 5XX responses from CloudFront, ignoring the 5 distributions with the highest percentage of errors\n```\n\n### Known issues\n\n* If more than 5 services have high error rates due to non-platform issues (e.g. bad application code), this will unfairly affect our SLI\n* If a platform issue causes high error rates for fewer than 5 services our SLI will not be affected\n* The `5xx_errorrate` metric is a percentage, so low-traffic services with a few requests per minute are weighted equally with high-traffic services which have many requests per second\n\n### References\n\nSee [the pivotal tracker story to implement this dashboard](https://www.pivotaltracker.com/story/show/165379426)",
         "gridPos": {
           "h": 16,
