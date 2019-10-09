@@ -55,6 +55,7 @@ resource "aws_db_instance" "cf" {
   skip_final_snapshot        = "${var.cf_db_skip_final_snapshot}"
   vpc_security_group_ids     = ["${aws_security_group.cf_rds.id}"]
   auto_minor_version_upgrade = true
+  apply_immediately          = true
 
   tags {
     Name       = "${var.env}-cf"
