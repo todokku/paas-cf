@@ -300,6 +300,7 @@ groups:
       - deploy-paas-auditor
       - deploy-paas-billing
       - deploy-paas-metrics
+      - deploy-paas-marketplace
       - smoke-tests
       - acceptance-tests
       - custom-acceptance-tests
@@ -334,6 +335,7 @@ groups:
       - deploy-paas-auditor
       - deploy-paas-billing
       - deploy-paas-metrics
+      - deploy-paas-marketplace
   - name: operator
     jobs:
       - generate-git-keys
@@ -1684,6 +1686,7 @@ jobs:
                 METRICS_AWS_SECRET_ACCESS_KEY=$($VAL_FROM_YAML terraform_outputs_metrics_exporter_aws_secret_access_key cf-terraform-outputs.yml)
                 PAAS_ADMIN_AWS_ACCESS_KEY_ID=$($VAL_FROM_YAML terraform_outputs_paas_admin_metrics_aws_access_key_id cf-terraform-outputs.yml)
                 PAAS_ADMIN_AWS_SECRET_ACCESS_KEY=$($VAL_FROM_YAML terraform_outputs_paas_admin_metrics_aws_secret_access_key cf-terraform-outputs.yml)
+                PAAS_MARKETPLACE_SECRET=$(credhub get -q -n "${BOSH_NS}/secrets_uaa_clients_paas_marketplace_secret")
                 UAA_CLIENTS_CF_EXPORTER_SECRET=$(credhub get -q -n "${BOSH_NS}/uaa_clients_cf_exporter_secret")
                 UAA_CLIENTS_FIREHOSE_EXPORTER_SECRET=$(credhub get -q -n "${BOSH_NS}/uaa_clients_firehose_exporter_secret")
                 RDS_BROKER_PASS=$(credhub get -q -n "${BOSH_NS}/secrets_rds_broker_admin_password")
@@ -1713,6 +1716,7 @@ jobs:
                 credhub set --name="${PIPELINE_NS}/metrics_aws_secret_access_key" --type password --password "${METRICS_AWS_SECRET_ACCESS_KEY}"
                 credhub set --name="${PIPELINE_NS}/paas_admin_aws_access_key_id" --type password --password "${PAAS_ADMIN_AWS_ACCESS_KEY_ID}"
                 credhub set --name="${PIPELINE_NS}/paas_admin_aws_secret_access_key" --type password --password "${PAAS_ADMIN_AWS_SECRET_ACCESS_KEY}"
+                credhub set --name="${PIPELINE_NS}/paas_marketplace_secret" --type password --password "${PAAS_MARKETPLACE_SECRET}"
                 credhub set --name="${PIPELINE_NS}/uaa_clients_cf_exporter_secret" --type password --password "${UAA_CLIENTS_CF_EXPORTER_SECRET}"
                 credhub set --name="${PIPELINE_NS}/uaa_clients_firehose_exporter_secret" --type password --password "${UAA_CLIENTS_FIREHOSE_EXPORTER_SECRET}"
                 credhub set --name="${PIPELINE_NS}/secrets_rds_broker_admin_password" --type password --password "${RDS_BROKER_PASS}"
@@ -3850,6 +3854,47 @@ jobs:
                 ginkgo
       - *end-grafana-job-annotation
 
+  - name: deploy-paas-marketplace
+    serial: true
+    plan:
+      - *add-grafana-job-annotation
+      - get: paas-cf
+        trigger: true
+        passed: ['post-deploy']
+
+      - task: deploy
+        tags: [colocated-with-web]
+        config:
+          platform: linux
+          image_resource: *cf-cli-image-resource
+          params:
+            SYSTEM_DNS_ZONE_NAME: ((system_dns_zone_name))
+            API_ENDPOINT: ((api_endpoint))
+            CF_ADMIN: ((cf_admin))
+            CF_PASS: ((cf_pass))
+
+            MARKETPLACE_USER: "paas-marketplace"
+            MARKETPLACE_PASSWORD: ((paas_marketplace_secret))
+          inputs:
+            - name: paas-cf
+          run:
+            path: sh
+            args:
+              - -e
+              - -u
+              - -c
+              - |
+                echo | cf login -a "${API_ENDPOINT}" -u "${CF_ADMIN}" -p "${CF_PASS}" -o admin -s public
+
+                cd paas-cf/tools/marketplace/
+
+                cf push \
+                  --var cf_api=${API_ENDPOINT} \
+                  --var cf_client=${MARKETPLACE_USER} \
+                  --var cf_client_secret=${MARKETPLACE_PASSWORD} \
+                  --var system_dns_zone_name=${SYSTEM_DNS_ZONE_NAME}
+      - *end-grafana-job-annotation
+
   - name: rotate-certs
     serial: true
     plan:
@@ -4134,6 +4179,7 @@ jobs:
               credhub generate -n "${BOSH_NS}/secrets_uaa_clients_paas_auditor_secret" -t password
               credhub generate -n "${BOSH_NS}/secrets_uaa_clients_paas_billing_secret" -t password
               credhub generate -n "${BOSH_NS}/secrets_uaa_clients_paas_metrics_secret" -t password
+              credhub generate -n "${BOSH_NS}/secrets_uaa_clients_paas_marketplace_secret" -t password
               credhub generate -n "${BOSH_NS}/uaa_clients_cf_exporter_secret" -t password
               credhub generate -n "${BOSH_NS}/uaa_clients_cf_smoke_tests_secret" -t password
               credhub generate -n "${BOSH_NS}/uaa_clients_firehose_exporter_secret" -t password
