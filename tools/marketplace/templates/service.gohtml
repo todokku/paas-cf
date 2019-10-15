@@ -1,0 +1,10 @@
+{{/* . is an instance of viewmodels.Service */}}
+
+{{define "page-title"}}{{.CFService.Label}} - GOV.UK PaaS Service Marketplace{{end}}
+{{define "page-heading"}}GOV.UK PaaS Service Marketplace{{end}}
+
+{{define "main-content"}}
+    {{ partial "partials/service-plans" . }}
+{{end}}
+
+{{define "side-content"}}{{end}}

@@ -1,0 +1,31 @@
+{{/* . is an instance of viewmodels.Service */}}
+
+
+<table class="govuk-table">
+	<caption class="govuk-table__caption">Service plans offered for the {{.CFService.Label}} service</caption>
+	<thead class="govuk-table__head">
+	<tr class="govuk-table__row">
+		<th class="govuk-table__header">Name</th>
+		<th class="govuk-table__header">Description</th>
+		<th class="govuk-table__header">Free?</th>
+	</tr>
+	</thead>
+
+	<tbody class="govuk-table__body">
+  {{range $_, $plan := $.Plans}}
+      {{if $plan.Active}}
+				<tr class="govuk-table__row">
+					<td class="govuk-table__cell">{{$plan.Name}}</td>
+					<td class="govuk-table__cell">{{$plan.Description}}</td>
+					<td class="govuk-table__cell">
+              {{if $plan.Free -}}
+								Yes
+              {{else -}}
+								No
+              {{end}}
+					</td>
+				</tr>
+      {{end}}
+  {{end}}
+	</tbody>
+</table>

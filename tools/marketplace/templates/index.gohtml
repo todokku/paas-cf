@@ -1,0 +1,19 @@
+{{define "page-title"}}Home - GOV.UK PaaS Service Marketplace{{end}}
+{{define "page-heading"}}GOV.UK PaaS Service Marketplace{{end}}
+
+{{define "main-content"}}
+	{{partial "partials/services-list" .}}
+{{end}}
+
+{{define "side-content"}}
+	<h3 class="govuk-heading-m">Deploy a service</h3>
+	<p class="govuk-body">
+		Learn how to <a href="https://docs.cloud.service.gov.uk/deploying_services/">deploy a service</a> in the documentation
+	</p>
+
+	<h3 class="govuk-heading-m">See the marketplace at the command line</h3>
+	<p class="govuk-body">
+		Access this information at the command line by running
+	</p>
+	<pre>cf marketplace</pre>
+{{end}}

@@ -1,0 +1,10 @@
+---
+applications:
+  - name: paas-cf-marketplace
+    buildpacks: ["go_buildpack"]
+    routes:
+      - route: "marketplace.((system_dns_zone_name))"
+    env:
+      CF_API: ((cf_api))
+      CF_CLIENT: ((cf_client))
+      CF_CLIENT_SECRET: ((cf_client_secret))

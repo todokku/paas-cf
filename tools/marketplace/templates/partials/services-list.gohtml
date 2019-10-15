@@ -1,0 +1,11 @@
+{{/* . is an instance of viewmodels.ServicesViewModel */}}
+
+{{range $svcGuid, $svc := .Services}}
+	<span class="govuk-caption-l">Service</span>
+	<h2 class="govuk-heading-l">{{$svc.CFService.Label}}</h2>
+	<p class="govuk-body">
+		{{$svc.CFService.Description}}
+	</p>
+
+	<a href="/services/{{$svc.CFService.Label}}" class="govuk-link">Find out what plans are on offer</a>
+{{end}}
