@@ -113,7 +113,7 @@
   value:
     id: "5f2eec8a-0cad-4ab9-b81e-d6adade2fd42"
     name: "tiny-unencrypted-9.5"
-    description: "5GB Storage, NOT BACKED UP, Dedicated Instance, Max 50 Concurrent Connections. Postgres Version 9.5. DB Instance Class: db.t2.micro."
+    description: "https://marketplace.((system_domain))/postgres/tiny-unencrypted-9.5"
     free: true
     metadata:
       bullets:
@@ -128,7 +128,7 @@
   value:
     id: "2611d776-9991-4940-a755-880eafbc33a0"
     name: "small-9.5"
-    description: "20GB Storage, Dedicated Instance, Storage Encrypted, Max 200 Concurrent Connections. Postgres Version 9.5. DB Instance Class: db.t2.small."
+    description: "https://marketplace.((system_domain))/postgres/small-9.5"
     free: false
     metadata:
       costs:
