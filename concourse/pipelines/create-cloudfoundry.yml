@@ -2523,9 +2523,8 @@ jobs:
                 uaac token client get admin -s "${UAA_ADMIN_CLIENT_SECRET}"
                 CF_TOKEN="bearer $(uaac contexts | awk '$1 ~ /access_token/ {print $2}')"
                 export CF_TOKEN
-                cd paas-cf/tools/user_management
-                bundle --quiet
-                bundle exec main.rb
+                (cd paas-cf && bundle --quiet)
+                paas-cf/tools/user_management/main.rb
 
       - task: deploy-healthcheck
         tags: [colocated-with-web]
