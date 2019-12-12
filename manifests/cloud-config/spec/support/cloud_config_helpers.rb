@@ -19,12 +19,12 @@ private
   end
 
   def render_cloud_config
-    workdir = Dir.mktmpdir('paas-cf-test')
+    workdir = Dir.mktmpdir('paas-test')
 
     copy_terraform_fixtures("#{workdir}/terraform-outputs")
 
     env = {
-      'PAAS_CF_DIR' => root.to_s,
+      'PAAS_DIR' => root.to_s,
       'WORKDIR' => workdir,
     }
     output, error, status = Open3.capture3(env, root.join('manifests/cloud-config/scripts/generate-cloud-config.sh').to_s)

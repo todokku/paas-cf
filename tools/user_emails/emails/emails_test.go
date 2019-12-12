@@ -1,15 +1,15 @@
 package emails_test
 
 import (
-	"github.com/alphagov/paas-cf/tools/user_emails/emails"
-	"github.com/alphagov/paas-cf/tools/user_emails/emails/stubs"
+	"github.com/alphagov/paas/tools/user_emails/emails"
+	"github.com/alphagov/paas/tools/user_emails/emails/stubs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Emails", func() {
-	Context("with 'normal' urgency", func(){
-		It("gets the spaces for each organisation", func(){
+	Context("with 'normal' urgency", func() {
+		It("gets the spaces for each organisation", func() {
 			_, cfFake := stubs.CreateFakeWithStubData()
 
 			emails.FetchEmails(&cfFake, false)
@@ -25,21 +25,21 @@ var _ = Describe("Emails", func() {
 			Expect(names).To(ContainElement("user-3@paas.gov"))
 		})
 
-		It("only returns usernames which are valid email addresses", func(){
+		It("only returns usernames which are valid email addresses", func() {
 			_, cfFake := stubs.CreateFakeWithStubData()
 
 			names := emails.FetchEmails(&cfFake, false)
 			Expect(names).ToNot(ContainElement("admin"))
 		})
 
-		It("catches addresses that are known to be problematic", func(){
+		It("catches addresses that are known to be problematic", func() {
 			_, cfFake := stubs.CreateFakeWithStubData()
 
 			names := emails.FetchEmails(&cfFake, false)
 			Expect(names).To(ContainElement("test@homeoffice.x.gsi.gov.uk"))
 		})
 
-		It("de-duplicates email addresses", func(){
+		It("de-duplicates email addresses", func() {
 			_, cfFake := stubs.CreateFakeWithStubData()
 
 			names := emails.FetchEmails(&cfFake, false)
@@ -47,7 +47,7 @@ var _ = Describe("Emails", func() {
 
 			i := 0
 			for _, value := range names {
-				if value == "user-1@paas.gov"{
+				if value == "user-1@paas.gov" {
 					i++
 				}
 			}
@@ -55,8 +55,8 @@ var _ = Describe("Emails", func() {
 		})
 	})
 
-	Context("with 'critical' urgency", func(){
-		It("includes the username of each org manager", func(){
+	Context("with 'critical' urgency", func() {
+		It("includes the username of each org manager", func() {
 			_, cfFake := stubs.CreateFakeWithStubData()
 
 			names := emails.FetchEmails(&cfFake, true)
@@ -66,7 +66,7 @@ var _ = Describe("Emails", func() {
 			Expect(names).To(ContainElement("org-3-manager-1@paas.gov"))
 		})
 
-		It("includes the username of each org auditor", func(){
+		It("includes the username of each org auditor", func() {
 			_, cfFake := stubs.CreateFakeWithStubData()
 
 			names := emails.FetchEmails(&cfFake, true)
@@ -76,7 +76,7 @@ var _ = Describe("Emails", func() {
 			Expect(names).To(ContainElement("org-3-auditor-1@paas.gov"))
 		})
 
-		It("includes the username of each space manager in each space", func(){
+		It("includes the username of each space manager in each space", func() {
 			_, cfFake := stubs.CreateFakeWithStubData()
 
 			names := emails.FetchEmails(&cfFake, true)
@@ -86,7 +86,7 @@ var _ = Describe("Emails", func() {
 			Expect(names).To(ContainElement("org-3-space-1-manager-1@paas.gov"))
 		})
 
-		It("includes the username of each space auditor in each space", func(){
+		It("includes the username of each space auditor in each space", func() {
 			_, cfFake := stubs.CreateFakeWithStubData()
 
 			names := emails.FetchEmails(&cfFake, true)

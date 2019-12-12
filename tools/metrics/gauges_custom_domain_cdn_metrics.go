@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudfront"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudwatch"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudfront"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudwatch"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 func CustomDomainCDNMetricsCollector(

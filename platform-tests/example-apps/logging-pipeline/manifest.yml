@@ -9,4 +9,4 @@ applications:
    stack: cflinuxfs3
    env:
      GOVERSION: go1.13
-     GOPACKAGENAME: github.com/alphagov/paas-cf/platform-tests/example-apps/logging-pipeline
+     GOPACKAGENAME: github.com/alphagov/paas/platform-tests/example-apps/logging-pipeline

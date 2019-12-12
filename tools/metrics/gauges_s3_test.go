@@ -7,14 +7,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 
-	. "github.com/alphagov/paas-cf/tools/metrics"
+	. "github.com/alphagov/paas/tools/metrics"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/s3"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/s3/fakes"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/s3"
+	"github.com/alphagov/paas/tools/metrics/pkg/s3/fakes"
 )
 
 var _ = Describe("S3 Gauges", func() {

@@ -1,4 +1,4 @@
-module github.com/alphagov/paas-cf/tools/buildpacks
+module github.com/alphagov/paas/tools/buildpacks
 
 require (
 	github.com/google/go-github/v24 v24.0.0

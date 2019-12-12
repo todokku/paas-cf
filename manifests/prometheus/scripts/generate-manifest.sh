@@ -2,27 +2,27 @@
 
 set -euo pipefail
 
-PAAS_CF_DIR=${PAAS_CF_DIR:-paas-cf}
-PROM_BOSHRELEASE_DIR=${PAAS_CF_DIR}/manifests/prometheus/upstream
+PAAS_DIR=${PAAS_DIR:-paas}
+PROM_BOSHRELEASE_DIR=${PAAS_DIR}/manifests/prometheus/upstream
 WORKDIR=${WORKDIR:-.}
 
 
 opsfile_args=""
-for i in "${PAAS_CF_DIR}"/manifests/prometheus/operations.d/*.yml; do
+for i in "${PAAS_DIR}"/manifests/prometheus/operations.d/*.yml; do
   opsfile_args+="-o $i "
 done
 
 if [ "${SLIM_DEV_DEPLOYMENT-}" = "true" ]; then
-  opsfile_args+="-o ${PAAS_CF_DIR}/manifests/prometheus/operations/scale-down-dev.yml "
+  opsfile_args+="-o ${PAAS_DIR}/manifests/prometheus/operations/scale-down-dev.yml "
 fi
 
 alerts_opsfile_args=""
-for i in "${PAAS_CF_DIR}"/manifests/prometheus/alerts.d/*.yml; do
+for i in "${PAAS_DIR}"/manifests/prometheus/alerts.d/*.yml; do
   alerts_opsfile_args+="-o $i "
 done
 
 if [ "${ENABLE_ALERT_NOTIFICATIONS:-}" == "false" ]; then
-  opsfile_args+="-o ${PAAS_CF_DIR}/manifests/prometheus/operations/disable-alert-notifications.yml"
+  opsfile_args+="-o ${PAAS_DIR}/manifests/prometheus/operations/disable-alert-notifications.yml"
 fi
 
 variables_file="$(mktemp)"
@@ -51,8 +51,8 @@ EOF
 bosh interpolate \
   --vars-file="${variables_file}" \
   --vars-file="${WORKDIR}/terraform-outputs/cf.yml" \
-  --vars-file="${PAAS_CF_DIR}/manifests/prometheus/env-specific/${ENV_SPECIFIC_BOSH_VARS_FILE}" \
-  --vars-file="${PAAS_CF_DIR}/manifests/cf-manifest/env-specific/${ENV_SPECIFIC_BOSH_VARS_FILE}" \
+  --vars-file="${PAAS_DIR}/manifests/prometheus/env-specific/${ENV_SPECIFIC_BOSH_VARS_FILE}" \
+  --vars-file="${PAAS_DIR}/manifests/cf-manifest/env-specific/${ENV_SPECIFIC_BOSH_VARS_FILE}" \
   ${opsfile_args} \
   ${alerts_opsfile_args} \
   "${PROM_BOSHRELEASE_DIR}/manifests/prometheus.yml"

@@ -7,14 +7,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscw "github.com/aws/aws-sdk-go/service/cloudwatch"
 
-	. "github.com/alphagov/paas-cf/tools/metrics"
+	. "github.com/alphagov/paas/tools/metrics"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudfront"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudwatch"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudwatch/fakes"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudfront"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudwatch"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudwatch/fakes"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 type CloudFrontServiceStub struct {

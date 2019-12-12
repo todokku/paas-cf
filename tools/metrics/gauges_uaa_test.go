@@ -9,7 +9,7 @@ import (
 
 	uaaclient "github.com/cloudfoundry-community/go-uaa"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 var _ = Describe("UAA", func() {

@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"sync"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/tlscheck"
+	"github.com/alphagov/paas/tools/metrics/pkg/tlscheck"
 )
 
 type FakeCertChecker struct {

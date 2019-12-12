@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/alphagov/paas-cf/tools/user_emails/emails"
+	"github.com/alphagov/paas/tools/user_emails/emails"
 	cfclient "github.com/cloudfoundry-community/go-cfclient"
 )
 

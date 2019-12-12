@@ -4,11 +4,11 @@ import (
 	"code.cloudfoundry.org/lager"
 	"encoding/json"
 	"fmt"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/logit/logitfakes"
+	"github.com/alphagov/paas/tools/metrics/pkg/logit/logitfakes"
 	"github.com/onsi/gomega/gbytes"
 	"strings"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

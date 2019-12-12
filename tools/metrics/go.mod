@@ -1,4 +1,4 @@
-module github.com/alphagov/paas-cf/tools/metrics
+module github.com/alphagov/paas/tools/metrics
 
 go 1.13
 

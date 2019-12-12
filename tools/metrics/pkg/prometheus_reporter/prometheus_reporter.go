@@ -6,7 +6,7 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/prometheus/client_golang/prometheus"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 // PrometheusReporter is translating events into Prometheus metrics

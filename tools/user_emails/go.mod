@@ -1,4 +1,4 @@
-module github.com/alphagov/paas-cf/tools/user_emails
+module github.com/alphagov/paas/tools/user_emails
 
 require (
 	code.cloudfoundry.org/lager v2.0.0+incompatible

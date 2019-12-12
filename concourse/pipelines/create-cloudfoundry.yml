@@ -404,12 +404,12 @@ resources:
       region_name: ((aws_region))
       key: ((pipeline_trigger_file))
 
-  - name: paas-cf
+  - name: paas
     type: git
     source:
-      uri: https://github.com/alphagov/paas-cf.git
+      uri: https://github.com/alphagov/paas.git
       branch: ((branch_name))
-      tag_filter: ((paas_cf_tag_filter))
+      tag_filter: ((paas_tag_filter))
       commit_verification_keys: ((gpg_public_keys))
 
   - name: vpc-tfstate
@@ -662,7 +662,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: paas-cf
+        - get: paas
           trigger: ((auto_deploy))
         - get: git-ssh-private-key
       - task: init-pipeline-pool
@@ -671,7 +671,7 @@ jobs:
           platform: linux
           image_resource: *git-ssh-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: git-ssh-private-key
           params:
             DEPLOY_ENV: ((deploy_env))
@@ -692,7 +692,7 @@ jobs:
               git config --global user.email "concourse@${DEPLOY_ENV}.${AWS_ACCOUNT}"
               git config --global user.name "Concourse server ${DEPLOY_ENV} in ${AWS_ACCOUNT}"
 
-              ./paas-cf/concourse/scripts/create_pool_lock.sh \
+              ./paas/concourse/scripts/create_pool_lock.sh \
                 "((git_concourse_pool_clone_full_url_ssh))" \
                 "$(pwd)/git-ssh-private-key/git_id_rsa" \
                 "((pipeline_name))" lock
@@ -736,7 +736,7 @@ jobs:
               repository: governmentpaas/self-update-pipelines
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             DEPLOY_ENV: ((deploy_env))
             BRANCH: ((branch_name))
@@ -751,7 +751,7 @@ jobs:
             SLIM_DEV_DEPLOYMENT: ((slim_dev_deployment))
             CONCOURSE_WEB_PASSWORD: ((concourse_web_password))
           run:
-            path: ./paas-cf/concourse/scripts/self-update-pipeline.sh
+            path: ./paas/concourse/scripts/self-update-pipeline.sh
 
       - *add-grafana-overview-annotation
 
@@ -763,7 +763,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-          - get: paas-cf
+          - get: paas
             passed: ['pipeline-lock']
           - get: pipeline-trigger
             passed: ['pipeline-lock']
@@ -780,7 +780,7 @@ jobs:
                 repository: governmentpaas/certstrap
                 tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
             inputs:
-              - name: paas-cf
+              - name: paas
               - name: ipsec-CA
                 path: existing-ipsec-CA
             outputs:
@@ -811,7 +811,7 @@ jobs:
             platform: linux
             image_resource: *gov-paas-bosh-cli-v2-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
             params:
               CREDHUB_CLIENT: credhub-admin
               CREDHUB_SECRET: ((bosh-credhub-admin))
@@ -862,7 +862,7 @@ jobs:
             platform: linux
             image_resource: *gov-paas-bosh-cli-v2-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
             params:
               CREDHUB_CLIENT: credhub-admin
               CREDHUB_SECRET: ((bosh-credhub-admin))
@@ -891,14 +891,14 @@ jobs:
             passed: ['generate-secrets']
             trigger: true
           - get: deployed-healthcheck
-          - get: paas-cf
+          - get: paas
             passed: ['generate-secrets']
       - task: wait-for-app-availability-tests
         tags: [colocated-with-web]
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: deployed-healthcheck
             - name: pipeline-trigger
           params:
@@ -942,7 +942,7 @@ jobs:
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: deployed-healthcheck
             - name: pipeline-trigger
           params:
@@ -985,7 +985,7 @@ jobs:
             passed: ['generate-secrets']
             trigger: true
           - get: deployed-healthcheck
-          - get: paas-cf
+          - get: paas
             passed: ['generate-secrets']
       - task: run-tests
         tags: [colocated-with-web]
@@ -993,7 +993,7 @@ jobs:
           platform: linux
           image_resource: *cf-acceptance-tests-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: pipeline-trigger
             - name: deployed-healthcheck
           params:
@@ -1023,7 +1023,7 @@ jobs:
                 PIPELINE_TRIGGER_VERSION=$(cat pipeline-trigger/number)
 
                 echo "Running app-availability-tests"
-                ./paas-cf/platform-tests/run_tests.sh ./paas-cf/platform-tests/src/platform/availability/app
+                ./paas/platform-tests/run_tests.sh ./paas/platform-tests/src/platform/availability/app
 
   - name: api-availability-tests
     serial: true
@@ -1033,7 +1033,7 @@ jobs:
             passed: ['generate-secrets']
             trigger: true
           - get: deployed-healthcheck
-          - get: paas-cf
+          - get: paas
             passed: ['generate-secrets']
 
       - task: upload-job-file
@@ -1067,7 +1067,7 @@ jobs:
           platform: linux
           image_resource: *cf-acceptance-tests-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: pipeline-trigger
             - name: deployed-healthcheck
           params:
@@ -1102,7 +1102,7 @@ jobs:
                 cf login -a "${API_ENDPOINT}" -u "${CF_USER}" -p "${CF_PASS}" -o admin -s healthchecks
 
                 echo "Running api-availability-tests"
-                ./paas-cf/platform-tests/run_tests.sh ./paas-cf/platform-tests/src/platform/availability/api
+                ./paas/platform-tests/run_tests.sh ./paas/platform-tests/src/platform/availability/api
         ensure:
           task: delete-job-file
           tags: [colocated-with-web]
@@ -1127,7 +1127,7 @@ jobs:
     plan:
       - *add-grafana-job-annotation
       - in_parallel:
-          - get: paas-cf
+          - get: paas
             passed: ['pre-deploy']
           - get: pipeline-trigger
             passed: ['pre-deploy']
@@ -1142,7 +1142,7 @@ jobs:
           platform: linux
           image_resource: *ruby-slim-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: vpc-tfstate
             - name: concourse-tfstate
           outputs:
@@ -1153,9 +1153,9 @@ jobs:
               - -e
               - -c
               - |
-                ruby paas-cf/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
+                ruby paas/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
                 < vpc-tfstate/vpc.tfstate > terraform-variables/vpc.tfvars.sh
-                ruby paas-cf/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
+                ruby paas/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
                 < concourse-tfstate/concourse.tfstate > terraform-variables/concourse.tfvars.sh
 
                 cat <<EOF > terraform-variables/cf-secrets.tfvars.sh
@@ -1179,7 +1179,7 @@ jobs:
           platform: linux
           image_resource: *ruby-slim-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
           outputs:
             - name: vpc-peering-tfvars
           run:
@@ -1188,7 +1188,7 @@ jobs:
               - -e
               - -c
               - |
-                ruby paas-cf/terraform/scripts/generate_vpc_peering_tfvars.rb "paas-cf/terraform/((deploy_env)).vpc_peering.json" \
+                ruby paas/terraform/scripts/generate_vpc_peering_tfvars.rb "paas/terraform/((deploy_env)).vpc_peering.json" \
                 > vpc-peering-tfvars/vpc-peers.tfvars
 
                 cat vpc-peering-tfvars/vpc-peers.tfvars
@@ -1200,7 +1200,7 @@ jobs:
           image_resource: *terraform-image-resource
           inputs:
             - name: terraform-variables
-            - name: paas-cf
+            - name: paas
             - name: cf-tfstate
             - name: vpc-peering-tfvars
           outputs:
@@ -1222,15 +1222,15 @@ jobs:
 
                 cp cf-tfstate/cf.tfstate updated-tfstate/cf.tfstate
 
-                terraform init paas-cf/terraform/cloudfoundry
+                terraform init paas/terraform/cloudfoundry
 
                 terraform apply \
                   -auto-approve=true \
-                  -var-file="paas-cf/terraform/((aws_account)).tfvars" \
-                  -var-file="paas-cf/terraform/((aws_region)).tfvars" \
+                  -var-file="paas/terraform/((aws_account)).tfvars" \
+                  -var-file="paas/terraform/((aws_region)).tfvars" \
                   -var-file=vpc-peering-tfvars/vpc-peers.tfvars \
                   -state=updated-tfstate/cf.tfstate \
-                  paas-cf/terraform/cloudfoundry
+                  paas/terraform/cloudfoundry
         ensure:
           put: cf-tfstate
           params:
@@ -1246,7 +1246,7 @@ jobs:
                 image_resource: *terraform-image-resource
                 inputs:
                   - name: terraform-variables
-                  - name: paas-cf
+                  - name: paas
                   - name: cyber-tfstate
                 outputs:
                   - name: updated-tfstate
@@ -1267,14 +1267,14 @@ jobs:
 
                       cp cyber-tfstate/cyber.tfstate updated-tfstate/cyber.tfstate
 
-                      terraform init paas-cf/terraform/cyber
+                      terraform init paas/terraform/cyber
 
                       terraform apply \
                         -auto-approve=true \
-                        -var-file="paas-cf/terraform/((aws_account)).tfvars" \
-                        -var-file="paas-cf/terraform/((aws_region)).tfvars" \
+                        -var-file="paas/terraform/((aws_account)).tfvars" \
+                        -var-file="paas/terraform/((aws_region)).tfvars" \
                         -state=updated-tfstate/cyber.tfstate \
-                        paas-cf/terraform/cyber
+                        paas/terraform/cyber
               ensure:
                 put: cyber-tfstate
                 params:
@@ -1286,7 +1286,7 @@ jobs:
           platform: linux
           image_resource: *ruby-slim-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-tfstate
           outputs:
             - name: cf-terraform-outputs
@@ -1296,7 +1296,7 @@ jobs:
               - -e
               - -c
               - |
-                SCPATH="./paas-cf/concourse/scripts"
+                SCPATH="./paas/concourse/scripts"
                 SCFILE="extract_tf_vars_from_terraform_state.rb"
                 $SCPATH/$SCFILE < cf-tfstate/cf.tfstate > cf-terraform-outputs/cf.tfstate.sh
                 ls -l cf-terraform-outputs/cf.tfstate.sh
@@ -1312,7 +1312,7 @@ jobs:
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           inputs:
             - name: terraform-variables
-            - name: paas-cf
+            - name: paas
             - name: cf-terraform-outputs
           run:
             path: sh
@@ -1323,7 +1323,7 @@ jobs:
                 . terraform-variables/cf-secrets.tfvars.sh
                 . cf-terraform-outputs/cf.tfstate.sh
 
-                paas-cf/manifests/cf-manifest/scripts/create-cf-dbs.sh
+                paas/manifests/cf-manifest/scripts/create-cf-dbs.sh
       - *end-grafana-job-annotation
 
   - name: generate-cf-config
@@ -1335,7 +1335,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['cf-terraform']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['cf-terraform']
           - get: ipsec-CA
           - get: vpc-tfstate
@@ -1350,7 +1350,7 @@ jobs:
             platform: linux
             image_resource: *ruby-slim-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
               - name: vpc-tfstate
               - name: bosh-tfstate
               - name: cf-tfstate
@@ -1363,10 +1363,10 @@ jobs:
                 - -c
                 - |
                   for state in vpc bosh cf; do
-                    ./paas-cf/concourse/scripts/extract_terraform_state_to_yaml.rb \
+                    ./paas/concourse/scripts/extract_terraform_state_to_yaml.rb \
                       < ${state}-tfstate/${state}.tfstate \
                       > terraform-outputs/${state}.yml
-                    ./paas-cf/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
+                    ./paas/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
                       < ${state}-tfstate/${state}.tfstate \
                       > terraform-outputs/${state}.tfvars.sh
                   done
@@ -1377,7 +1377,7 @@ jobs:
             platform: linux
             image_resource: *ruby-slim-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
             outputs:
               - name: vpc-peering-opsfile
             run:
@@ -1386,7 +1386,7 @@ jobs:
                 - -e
                 - -c
                 - |
-                  ruby paas-cf/terraform/scripts/generate_vpc_peering_opsfile.rb "paas-cf/terraform/((deploy_env)).vpc_peering.json" \
+                  ruby paas/terraform/scripts/generate_vpc_peering_opsfile.rb "paas/terraform/((deploy_env)).vpc_peering.json" \
                   > vpc-peering-opsfile/vpc-peers.yml
 
                   cat vpc-peering-opsfile/vpc-peers.yml
@@ -1425,7 +1425,7 @@ jobs:
             platform: linux
             image_resource: *gov-paas-bosh-cli-v2-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
               - name: terraform-outputs
             outputs:
               - name: paas-cf-cloud-config
@@ -1435,7 +1435,7 @@ jobs:
                 - -e
                 - -c
                 - |
-                  paas-cf/manifests/cloud-config/scripts/generate-cloud-config.sh > paas-cf-cloud-config/paas-cf-cloud-config.yml
+                  paas/manifests/cloud-config/scripts/generate-cloud-config.sh > paas-cf-cloud-config/paas-cf-cloud-config.yml
 
           on_success:
             put: paas-cf-cloud-config
@@ -1448,7 +1448,7 @@ jobs:
             platform: linux
             image_resource: *gov-paas-bosh-cli-v2-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
               - name: ipsec-CA
               - name: terraform-outputs
               - name: vpc-peering-opsfile
@@ -1457,7 +1457,7 @@ jobs:
               - name: cf-manifest
               - name: cf-manifest-pre-vars
             params:
-              ENV_SPECIFIC_BOSH_VARS_FILE: paas-cf/manifests/cf-manifest/env-specific/((env_specific_bosh_vars_file))
+              ENV_SPECIFIC_BOSH_VARS_FILE: paas/manifests/cf-manifest/env-specific/((env_specific_bosh_vars_file))
               SLIM_DEV_DEPLOYMENT: ((slim_dev_deployment))
               VCAP_PASSWORD: ((vcap-password))
             run:
@@ -1483,10 +1483,10 @@ jobs:
 
                   tar -xzf ./ipsec-CA/ipsec-CA.tar.gz -C ./ipsec-CA
 
-                  ./paas-cf/manifests/cf-manifest/scripts/generate-manifest.sh \
+                  ./paas/manifests/cf-manifest/scripts/generate-manifest.sh \
                     > cf-manifest/cf-manifest.yml
 
-                  ./paas-cf/manifests/cf-manifest/scripts/generate-manifest.sh \
+                  ./paas/manifests/cf-manifest/scripts/generate-manifest.sh \
                     > cf-manifest-pre-vars/cf-manifest-pre-vars.yml
 
           on_success:
@@ -1508,7 +1508,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['generate-cf-config']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['generate-cf-config']
           - get: paas-cf-cloud-config
             passed: ['generate-cf-config']
@@ -1524,7 +1524,7 @@ jobs:
             platform: linux
             image_resource: *gov-paas-bosh-cli-v2-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
               - name: cf-manifest
             params:
               BOSH_ENVIRONMENT: ((bosh_fqdn))
@@ -1537,7 +1537,7 @@ jobs:
                 - -e
                 - -c
                 - |
-                  VAL_FROM_YAML=$(pwd)/paas-cf/concourse/scripts/val_from_yaml.rb
+                  VAL_FROM_YAML=$(pwd)/paas/concourse/scripts/val_from_yaml.rb
 
                   BOSH_CLIENT='admin'
                   export BOSH_CLIENT
@@ -1565,7 +1565,7 @@ jobs:
             image_resource: *gov-paas-bosh-cli-v2-image-resource
             inputs:
               - name: paas-cf-cloud-config
-              - name: paas-cf
+              - name: paas
             params:
               BOSH_ENVIRONMENT: ((bosh_fqdn))
               BOSH_CA_CERT: ((bosh-ca-cert))
@@ -1582,7 +1582,7 @@ jobs:
 
                   bosh -n update-config \
                     --type=cloud \
-                    --name=paas-cf \
+                    --name=paas \
                     paas-cf-cloud-config/paas-cf-cloud-config.yml
 
       - task: cf-deploy
@@ -1591,7 +1591,7 @@ jobs:
           platform: linux
           image_resource: *gov-paas-bosh-cli-v2-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-manifest
           params:
             BOSH_ENVIRONMENT: ((bosh_fqdn))
@@ -1615,7 +1615,7 @@ jobs:
           platform: linux
           image_resource: *gov-paas-bosh-cli-v2-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-manifest
             - name: cf-tfstate
           params:
@@ -1631,9 +1631,9 @@ jobs:
               - -e
               - -c
               - |
-                VAL_FROM_YAML=$(pwd)/paas-cf/concourse/scripts/val_from_yaml.rb
+                VAL_FROM_YAML=$(pwd)/paas/concourse/scripts/val_from_yaml.rb
 
-                ./paas-cf/concourse/scripts/extract_terraform_state_to_yaml.rb \
+                ./paas/concourse/scripts/extract_terraform_state_to_yaml.rb \
                 < cf-tfstate/cf.tfstate \
                 > cf-terraform-outputs.yml
 
@@ -1708,7 +1708,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['cf-deploy']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['cf-deploy']
           - get: cf-tfstate
           - get: paas-yet-another-cloudwatch-exporter
@@ -1719,7 +1719,7 @@ jobs:
           platform: linux
           image_resource: *ruby-slim-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-tfstate
           outputs:
             - name: terraform-outputs
@@ -1729,7 +1729,7 @@ jobs:
               - -e
               - -c
               - |
-                ./paas-cf/concourse/scripts/extract_terraform_state_to_yaml.rb \
+                ./paas/concourse/scripts/extract_terraform_state_to_yaml.rb \
                   < cf-tfstate/cf.tfstate \
                   > terraform-outputs/cf.yml
 
@@ -1739,7 +1739,7 @@ jobs:
           platform: linux
           image_resource: *gov-paas-bosh-cli-v2-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: terraform-outputs
           outputs:
             - name: prometheus-manifest
@@ -1770,10 +1770,10 @@ jobs:
                 BOSH_CA_CERT="$(awk -v ORS='\\n' '1' <(printenv BOSH_CA_CERT | tr -d '\r'))"
                 export BOSH_CA_CERT
 
-                ./paas-cf/manifests/prometheus/scripts/generate-manifest.sh \
+                ./paas/manifests/prometheus/scripts/generate-manifest.sh \
                   > prometheus-manifest/prometheus-manifest.yml
 
-                ./paas-cf/manifests/prometheus/scripts/generate-manifest.sh \
+                ./paas/manifests/prometheus/scripts/generate-manifest.sh \
                   > prometheus-manifest-pre-vars/prometheus-manifest-pre-vars.yml
 
         on_success:
@@ -1786,7 +1786,7 @@ jobs:
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: terraform-outputs
           outputs:
             - name: config
@@ -1799,7 +1799,7 @@ jobs:
               - -e
               - -c
               - |
-                VAL_FROM_YAML=$(pwd)/paas-cf/concourse/scripts/val_from_yaml.rb
+                VAL_FROM_YAML=$(pwd)/paas/concourse/scripts/val_from_yaml.rb
 
                 cat << EOT > config/config.sh
                 export YACE_AWS_ACCESS_KEY_ID=$($VAL_FROM_YAML terraform_outputs_yace_aws_access_key_id terraform-outputs/cf.yml)
@@ -1812,7 +1812,7 @@ jobs:
           platform: linux
           image_resource: *gov-paas-bosh-cli-v2-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: prometheus-manifest
           params:
             BOSH_ENVIRONMENT: ((bosh_fqdn))
@@ -1837,7 +1837,7 @@ jobs:
           platform: linux
           image_resource: *gov-paas-bosh-cli-v2-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             SYSTEM_DNS_ZONE_NAME: ((system_dns_zone_name))
             BOSH_ENVIRONMENT: ((bosh_fqdn))
@@ -1877,7 +1877,7 @@ jobs:
               CF_ADMIN: ((cf_admin))
               CF_PASS: ((cf_pass))
             inputs:
-              - name: paas-cf
+              - name: paas
               - name: config
               - name: paas-yet-another-cloudwatch-exporter
             run:
@@ -1889,7 +1889,7 @@ jobs:
                   . ./config/config.sh
                   echo | cf login -a "${API_ENDPOINT}" -u "${CF_ADMIN}" -p "${CF_PASS}" -o admin -s monitoring
 
-                  spruce merge paas-cf/config/cloudwatch-exporter/config.yml > paas-yet-another-cloudwatch-exporter/src/config.yml
+                  spruce merge paas/config/cloudwatch-exporter/config.yml > paas-yet-another-cloudwatch-exporter/src/config.yml
 
                   cd paas-yet-another-cloudwatch-exporter/src
 
@@ -1923,7 +1923,7 @@ jobs:
               SLIM_DEV_DEPLOYMENT: ((slim_dev_deployment))
               GRAFANA_PASS: ((grafana_password))
             inputs:
-              - name: paas-cf
+              - name: paas
             run:
               path: sh
               args:
@@ -1936,7 +1936,7 @@ jobs:
                     AZ_COUNT=1
                   fi
 
-                  for f in "$(pwd)/paas-cf/manifests/prometheus/dashboards.d/"*.json; do
+                  for f in "$(pwd)/paas/manifests/prometheus/dashboards.d/"*.json; do
                     for az in $(seq 1 $AZ_COUNT); do
                       sed "s/__SYSTEM_DNS_ZONE_NAME__/${SYSTEM_DNS_ZONE_NAME}/g" "${f}" \
                       | sed "s/__DEPLOY_ENV__/${DEPLOY_ENV}/g" \
@@ -1951,7 +1951,7 @@ jobs:
 
         - task: configure-grafana
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/configure-grafana.yml
+          file: paas/concourse/tasks/configure-grafana.yml
           params:
             SYSTEM_DNS_ZONE_NAME: ((system_dns_zone_name))
             DEPLOY_ENV: ((deploy_env))
@@ -1968,7 +1968,7 @@ jobs:
       - get: pipeline-trigger
         passed: ['cf-deploy']
         trigger: true
-      - get: paas-cf
+      - get: paas
         passed: ['cf-deploy']
       - get: cf-manifest
         passed: ['generate-cf-config']
@@ -1981,7 +1981,7 @@ jobs:
       config: &post-deploy-config
         platform: linux
         inputs:
-          - name: paas-cf
+          - name: paas
           - name: cf-manifest
           - name: cf-tfstate
         outputs:
@@ -1995,9 +1995,9 @@ jobs:
             - -e
             - -c
             - |
-              VAL_FROM_YAML=$(pwd)/paas-cf/concourse/scripts/val_from_yaml.rb
+              VAL_FROM_YAML=$(pwd)/paas/concourse/scripts/val_from_yaml.rb
 
-              ./paas-cf/concourse/scripts/extract_terraform_state_to_yaml.rb \
+              ./paas/concourse/scripts/extract_terraform_state_to_yaml.rb \
                 < cf-tfstate/cf.tfstate \
                 > cf-terraform-outputs.yml
 
@@ -2022,7 +2022,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             API_ENDPOINT: ((api_endpoint))
             CF_ADMIN: ((cf_admin))
@@ -2034,14 +2034,14 @@ jobs:
               - -c
               - |
                 echo | cf login -a "${API_ENDPOINT}" -u "${CF_ADMIN}" -p "${CF_PASS}"
-                ./paas-cf/concourse/scripts/parse_buildpacks_and_run_uploader.rb paas-cf/config/buildpacks.yml
+                ./paas/concourse/scripts/parse_buildpacks_and_run_uploader.rb paas/config/buildpacks.yml
       - task: create-orgs
         tags: [colocated-with-web]
         config:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: config
           params:
             APPS_DNS_ZONE_NAME: ((apps_dns_zone_name))
@@ -2105,7 +2105,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: config
           params:
             API_ENDPOINT: ((api_endpoint))
@@ -2219,7 +2219,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: config
           params:
             API_ENDPOINT: ((api_endpoint))
@@ -2250,7 +2250,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: config
           params:
             API_ENDPOINT: ((api_endpoint))
@@ -2281,7 +2281,7 @@ jobs:
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-manifest
           params:
             API_ENDPOINT: ((api_endpoint))
@@ -2297,14 +2297,14 @@ jobs:
               - |
                 echo | cf login -a "${API_ENDPOINT}" -u "${CF_ADMIN}" -p "${CF_PASS}"
 
-                ./paas-cf/concourse/scripts/set_security_groups_from_manifest.rb cf-manifest/cf-manifest.yml
+                ./paas/concourse/scripts/set_security_groups_from_manifest.rb cf-manifest/cf-manifest.yml
 
       - task: set-quotas-from-manifest
         tags: [colocated-with-web]
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-manifest
           params:
             API_ENDPOINT: ((api_endpoint))
@@ -2320,14 +2320,14 @@ jobs:
               - |
                 echo | cf login -a "${API_ENDPOINT}" -u "${CF_ADMIN}" -p "${CF_PASS}"
 
-                ./paas-cf/concourse/scripts/set_quotas_from_manifest.rb cf-manifest/cf-manifest.yml
+                ./paas/concourse/scripts/set_quotas_from_manifest.rb cf-manifest/cf-manifest.yml
 
       - task: enable-diego_docker-feature-flag
         tags: [colocated-with-web]
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             API_ENDPOINT: ((api_endpoint))
             CF_ADMIN: ((cf_admin))
@@ -2349,7 +2349,7 @@ jobs:
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             API_ENDPOINT: ((api_endpoint))
             CF_ADMIN: ((cf_admin))
@@ -2374,7 +2374,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             LOGIN_URL: https://login.((system_dns_zone_name))
             UAA_URL: https://uaa.((system_dns_zone_name))
@@ -2386,7 +2386,7 @@ jobs:
               - -u
               - -c
               - |
-                ./paas-cf/concourse/scripts/uaa_set_email_domains.sh '["*.*", "*.*.*", "*.*.*.*", "*.*.*.*.*", "*.*.*.*.*.*"]'
+                ./paas/concourse/scripts/uaa_set_email_domains.sh '["*.*", "*.*.*", "*.*.*.*", "*.*.*.*.*", "*.*.*.*.*.*"]'
 
     - in_parallel:
       - task: block-create-account-endpoints
@@ -2395,7 +2395,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             API_ENDPOINT: ((api_endpoint))
             CF_ADMIN: ((cf_admin))
@@ -2410,7 +2410,7 @@ jobs:
                 cf login -a "${API_ENDPOINT}" -u "${CF_ADMIN}" -p "${CF_PASS}" \
                   -o admin -s assets
 
-                cd paas-cf/platform-tests/example-apps/create-account-holding-page/
+                cd paas/platform-tests/example-apps/create-account-holding-page/
                 cf push
 
                 if ! cf domains | grep -q "login.((system_dns_zone_name))"; then
@@ -2451,7 +2451,7 @@ jobs:
             CF_ADMIN: ((cf_admin))
             CF_PASS: ((cf_pass))
           inputs:
-            - name: paas-cf
+            - name: paas
           run:
             path: sh
             args:
@@ -2468,7 +2468,7 @@ jobs:
 
                 cf target -o admin -s healthchecks
 
-                cd paas-cf/platform-tests/example-apps/healthcheck
+                cd paas/platform-tests/example-apps/healthcheck
                 cf push simulated-load -i 180
 
                 timeout=300
@@ -2506,7 +2506,7 @@ jobs:
           platform: linux
           image_resource: *cf-uaac-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-manifest
           params:
             UAA_API_URL: https://uaa.((system_dns_zone_name))
@@ -2523,7 +2523,7 @@ jobs:
                 uaac token client get admin -s "${UAA_ADMIN_CLIENT_SECRET}"
                 CF_TOKEN="bearer $(uaac contexts | awk '$1 ~ /access_token/ {print $2}')"
                 export CF_TOKEN
-                cd paas-cf/tools/user_management
+                cd paas/tools/user_management
                 bundle --quiet
                 bundle exec main.rb
 
@@ -2539,7 +2539,7 @@ jobs:
             CF_ADMIN: ((cf_admin))
             CF_PASS: ((cf_pass))
           inputs:
-            - name: paas-cf
+            - name: paas
           outputs:
             - name: deployed-healthcheck
           run:
@@ -2553,7 +2553,7 @@ jobs:
 
                 cf target -o admin -s healthchecks
                 BUILD_ROOT=$(pwd)
-                cd paas-cf/platform-tests/example-apps/healthcheck
+                cd paas/platform-tests/example-apps/healthcheck
 
                 if  [ "${DISABLE_HEALTHCHECK_DB:-}" != "true" ] ; then
 
@@ -2598,7 +2598,7 @@ jobs:
             platform: linux
             image_resource: *cf-cli-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
             params:
               SYSTEM_DNS_ZONE_NAME: ((system_dns_zone_name))
               API_ENDPOINT: ((api_endpoint))
@@ -2624,7 +2624,7 @@ jobs:
             platform: linux
             image_resource: *gov-paas-bosh-cli-v2-image-resource
             inputs:
-              - name: paas-cf
+              - name: paas
             params:
               BOSH_ENVIRONMENT: ((bosh_fqdn))
               BOSH_CA_CERT: ((bosh-ca-cert))
@@ -2648,7 +2648,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: paas-aiven-broker
             - name: config
           params:
@@ -2672,7 +2672,7 @@ jobs:
                 cf login -a "${API_ENDPOINT}" -u "${CF_ADMIN}" -p "${CF_PASS}" \
                   -o admin -s service-brokers
 
-                cp ./paas-cf/config/service-brokers/aiven/config.json ./paas-aiven-broker/
+                cp ./paas/config/service-brokers/aiven/config.json ./paas-aiven-broker/
                 cd paas-aiven-broker/
 
                 ruby -ryaml -e "
@@ -2713,7 +2713,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: config
           params:
             API_ENDPOINT: ((api_endpoint))
@@ -2793,7 +2793,7 @@ jobs:
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
             trigger: true
           - get: cf-smoke-tests-release
-          - get: paas-cf
+          - get: paas
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
           - get: cf-manifest
             passed: ['post-deploy']
@@ -2801,14 +2801,14 @@ jobs:
       - do:
         - task: create-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/create_admin.yml
+          file: paas/concourse/tasks/create_admin.yml
           params:
             PREFIX: smoketest-user
             UAA_ADMIN_CLIENT_PASS: ((uaa_admin_client_secret))
 
         - task: smoke-tests-config
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/generate-test-config.yml
+          file: paas/concourse/tasks/generate-test-config.yml
           params:
             TEST_PROPERTIES: smoke_tests
             APP_DOMAIN: ((apps_dns_zone_name))
@@ -2817,18 +2817,18 @@ jobs:
 
         - task: smoke-tests-run
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/smoke-tests-run.yml
+          file: paas/concourse/tasks/smoke-tests-run.yml
           ensure:
             task: upload-test-artifacts
             tags: [colocated-with-web]
-            file: paas-cf/concourse/tasks/upload-test-artifacts.yml
+            file: paas/concourse/tasks/upload-test-artifacts.yml
             params:
               TEST_ARTIFACTS_BUCKET: ((test_artifacts_bucket))
 
         ensure:
           task: remove-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/delete_admin.yml
+          file: paas/concourse/tasks/delete_admin.yml
           params:
             API_ENDPOINT: ((api_endpoint))
             CF_ADMIN: ((cf_admin))
@@ -2843,7 +2843,7 @@ jobs:
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
             trigger: true
           - get: cf-acceptance-tests
-          - get: paas-cf
+          - get: paas
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
           - get: cf-manifest
             passed: ['post-deploy']
@@ -2851,7 +2851,7 @@ jobs:
       - do:
         - task: create-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/create_admin.yml
+          file: paas/concourse/tasks/create_admin.yml
           params:
             PREFIX: acceptance-test-user
             DISABLE_ADMIN_USER_CREATION: ((disable_cf_acceptance_tests))
@@ -2860,7 +2860,7 @@ jobs:
         - do:
           - task: generate-test-config
             tags: [colocated-with-web]
-            file: paas-cf/concourse/tasks/generate-test-config.yml
+            file: paas/concourse/tasks/generate-test-config.yml
             params:
               TEST_PROPERTIES: acceptance_tests
               APP_DOMAIN: ((apps_dns_zone_name))
@@ -2874,7 +2874,7 @@ jobs:
               params:
                 DISABLE_CF_ACCEPTANCE_TESTS: ((disable_cf_acceptance_tests))
               inputs:
-                - name: paas-cf
+                - name: paas
                 - name: cf-acceptance-tests
                   path: src/github.com/cloudfoundry/cf-acceptance-tests
                 - name: test-config
@@ -2882,17 +2882,17 @@ jobs:
                 - name: artifacts
                   path: /tmp/artifacts
               run:
-                path: ./paas-cf/platform-tests/upstream/run_acceptance_tests.sh
+                path: ./paas/platform-tests/upstream/run_acceptance_tests.sh
             ensure:
               task: upload-test-artifacts
               tags: [colocated-with-web]
-              file: paas-cf/concourse/tasks/upload-test-artifacts.yml
+              file: paas/concourse/tasks/upload-test-artifacts.yml
               params:
                 TEST_ARTIFACTS_BUCKET: ((test_artifacts_bucket))
           ensure:
             task: remove-temp-user
             tags: [colocated-with-web]
-            file: paas-cf/concourse/tasks/delete_admin.yml
+            file: paas/concourse/tasks/delete_admin.yml
             params:
               DISABLE_ADMIN_USER_CREATION: ((disable_cf_acceptance_tests))
               API_ENDPOINT: ((api_endpoint))
@@ -2907,7 +2907,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
           - get: cf-manifest
             passed: ['post-deploy']
@@ -2916,7 +2916,7 @@ jobs:
       - do:
         - task: create-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/create_admin.yml
+          file: paas/concourse/tasks/create_admin.yml
           params:
             PREFIX: custom-acceptance-test-user
             DISABLE_ADMIN_USER_CREATION: ((disable_custom_acceptance_tests))
@@ -2924,7 +2924,7 @@ jobs:
 
         - task: generate-test-config
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/generate-test-config.yml
+          file: paas/concourse/tasks/generate-test-config.yml
           params:
             TEST_PROPERTIES: acceptance_tests
             APP_DOMAIN: ((apps_dns_zone_name))
@@ -2935,7 +2935,7 @@ jobs:
         - in_parallel:
           - task: "Run custom acceptance tests"
             tags: [colocated-with-web]
-            file: paas-cf/concourse/tasks/custom-acceptance-tests-run.yml
+            file: paas/concourse/tasks/custom-acceptance-tests-run.yml
             params:
               DISABLE_CUSTOM_ACCEPTANCE_TESTS: ((disable_custom_acceptance_tests))
               DEPLOY_ENV: ((deploy_env))
@@ -2945,7 +2945,7 @@ jobs:
             ensure:
               task: upload-test-artifacts
               tags: [colocated-with-web]
-              file: paas-cf/concourse/tasks/upload-test-artifacts.yml
+              file: paas/concourse/tasks/upload-test-artifacts.yml
               params:
                 TEST_ARTIFACTS_BUCKET: ((test_artifacts_bucket))
 
@@ -2955,7 +2955,7 @@ jobs:
               platform: linux
               image_resource: *cf-cli-image-resource
               inputs:
-                - name: paas-cf
+                - name: paas
                 - name: cf-manifest
               params:
                 CF_ADMIN: admin
@@ -2979,7 +2979,7 @@ jobs:
                     require 'yaml'
 
                     expected = YAML
-                      .load_file('paas-cf/config/buildpacks.yml')
+                      .load_file('paas/config/buildpacks.yml')
                       .fetch('buildpacks', [])
                       .map { |pack| pack['name']+' '+pack['stack'] }
 
@@ -3017,7 +3017,7 @@ jobs:
         ensure:
           task: remove-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/delete_admin.yml
+          file: paas/concourse/tasks/delete_admin.yml
           params:
             DISABLE_ADMIN_USER_CREATION: ((disable_custom_acceptance_tests))
             API_ENDPOINT: ((api_endpoint))
@@ -3032,7 +3032,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
           - get: cf-manifest
             passed: ['post-deploy']
@@ -3041,7 +3041,7 @@ jobs:
       - do:
         - task: create-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/create_admin.yml
+          file: paas/concourse/tasks/create_admin.yml
           params:
             PREFIX: custom-broker-acceptance-test-user
             DISABLE_ADMIN_USER_CREATION: ((disable_custom_acceptance_tests))
@@ -3049,7 +3049,7 @@ jobs:
 
         - task: generate-test-config
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/generate-test-config.yml
+          file: paas/concourse/tasks/generate-test-config.yml
           params:
             TEST_PROPERTIES: acceptance_tests
             APP_DOMAIN: ((apps_dns_zone_name))
@@ -3060,7 +3060,7 @@ jobs:
         - in_parallel:
           - task: "Run broker custom acceptance tests"
             tags: [colocated-with-web]
-            file: paas-cf/concourse/tasks/custom-broker-acceptance-tests-run.yml
+            file: paas/concourse/tasks/custom-broker-acceptance-tests-run.yml
             params:
               DISABLE_CUSTOM_ACCEPTANCE_TESTS: ((disable_custom_acceptance_tests))
               DEPLOY_ENV: ((deploy_env))
@@ -3070,14 +3070,14 @@ jobs:
             ensure:
               task: upload-test-artifacts
               tags: [colocated-with-web]
-              file: paas-cf/concourse/tasks/upload-test-artifacts.yml
+              file: paas/concourse/tasks/upload-test-artifacts.yml
               params:
                 TEST_ARTIFACTS_BUCKET: ((test_artifacts_bucket))
 
         ensure:
           task: remove-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/delete_admin.yml
+          file: paas/concourse/tasks/delete_admin.yml
           params:
             DISABLE_ADMIN_USER_CREATION: ((disable_custom_acceptance_tests))
             API_ENDPOINT: ((api_endpoint))
@@ -3091,7 +3091,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['post-deploy','prometheus-deploy','app-availability-tests','api-availability-tests']
           - get: cf-manifest
       - task: test-bosh-vms
@@ -3100,7 +3100,7 @@ jobs:
           platform: linux
           image_resource: *gov-paas-bosh-cli-v2-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-manifest
           params:
             BOSH_ENVIRONMENT: ((bosh_fqdn))
@@ -3134,7 +3134,7 @@ jobs:
         - get: paas-audit-to-splunk
           trigger: true
 
-        - get: paas-cf
+        - get: paas
           trigger: true
           passed: ['post-deploy']
 
@@ -3155,7 +3155,7 @@ jobs:
             CF_ADMIN: ((cf_admin))
             CF_PASS: ((cf_pass))
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: paas-audit-to-splunk
           run:
             path: sh
@@ -3199,7 +3199,7 @@ jobs:
         trigger: true
 
       - in_parallel:
-        - get: paas-cf
+        - get: paas
           trigger: true
           passed: ['post-deploy']
 
@@ -3216,7 +3216,7 @@ jobs:
             CF_ADMIN: ((cf_admin))
             CF_PASS: ((cf_pass))
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: paas-accounts
           run:
             path: sh
@@ -3289,7 +3289,7 @@ jobs:
                 fi
 
                 echo "Uploading documents"
-                cd paas-cf/config/accounts/documents
+                cd paas/config/accounts/documents
 
                 for file in *.md; do
 
@@ -3316,7 +3316,7 @@ jobs:
         trigger: true
 
       - in_parallel:
-        - get: paas-cf
+        - get: paas
           trigger: true
           passed: ['post-deploy']
 
@@ -3359,7 +3359,7 @@ jobs:
               repository: governmentpaas/spruce
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: paas-admin-dist
           outputs:
             - name: paas-admin-manifest
@@ -3416,7 +3416,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: paas-admin-dist
             - name: paas-admin-manifest
           params:
@@ -3443,7 +3443,7 @@ jobs:
       - do:
         - task: create-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/create_admin.yml
+          file: paas/concourse/tasks/create_admin.yml
           params:
             PREFIX: paas-admin-test-user
             DISABLE_ADMIN_USER_CREATION: false
@@ -3464,7 +3464,7 @@ jobs:
               SYSTEM_DNS_ZONE_NAME: ((system_dns_zone_name))
               ACCOUNTS_PASSWORD: ((paas_accounts_password))
             inputs:
-              - name: paas-cf
+              - name: paas
               - name: paas-admin
               - name: admin-creds
             run:
@@ -3492,7 +3492,7 @@ jobs:
         ensure:
           task: remove-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/delete_admin.yml
+          file: paas/concourse/tasks/delete_admin.yml
           params:
             API_ENDPOINT: ((api_endpoint))
             CF_ADMIN: ((cf_admin))
@@ -3569,7 +3569,7 @@ jobs:
         trigger: true
 
       - in_parallel:
-        - get: paas-cf
+        - get: paas
           trigger: true
           passed: ['post-deploy']
 
@@ -3589,7 +3589,7 @@ jobs:
             CF_ADMIN: ((cf_admin))
             CF_PASS: ((cf_pass))
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: paas-billing
           run:
             path: sh
@@ -3625,7 +3625,7 @@ jobs:
                     -l "syslog-tls://${LOGIT_ADDRESS}:${LOGIT_PORT}"
                 fi
 
-                cp "paas-cf/config/billing/output/${AWS_REGION}.json" paas-billing/config.json
+                cp "paas/config/billing/output/${AWS_REGION}.json" paas-billing/config.json
 
                 cd paas-billing
 
@@ -3690,7 +3690,7 @@ jobs:
             CF_ADMIN: ((cf_admin))
             CF_PASS: ((cf_pass))
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: paas-billing
               path: src/github.com/alphagov/paas-billing
           run:
@@ -3712,7 +3712,7 @@ jobs:
     serial: true
     plan:
       - *add-grafana-job-annotation
-      - get: paas-cf
+      - get: paas
         trigger: true
         passed: ['post-deploy']
 
@@ -3743,7 +3743,7 @@ jobs:
             LOGIT_ELASTICSEARCH_URL: ((logit_elasticsearch_url))
             LOGIT_ELASTICSEARCH_API_KEY: ((logit_elasticsearch_api_key))
           inputs:
-            - name: paas-cf
+            - name: paas
           run:
             path: sh
             args:
@@ -3753,7 +3753,7 @@ jobs:
               - |
                 echo | cf login -a "${API_ENDPOINT}" -u "${CF_ADMIN}" -p "${CF_PASS}" -o admin -s monitoring
 
-                cd paas-cf/tools/metrics
+                cd paas/tools/metrics
 
                 ruby -ryaml -e "
                   env = {
@@ -3797,7 +3797,7 @@ jobs:
           platform: linux
           image_resource: *golang-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             PAAS_METRICS_URL: https://paas-metrics.((apps_dns_zone_name))/metrics
           run:
@@ -3807,7 +3807,7 @@ jobs:
               - -e
               - -c
               - |
-                cd paas-cf/tools/metrics/acceptance
+                cd paas/tools/metrics/acceptance
                 go install github.com/onsi/ginkgo/ginkgo
                 echo 'Waiting 2 minutes before running the acceptance tests'
                 sleep 120
@@ -3821,7 +3821,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['smoke-tests', 'acceptance-tests', 'custom-acceptance-tests', 'custom-broker-acceptance-tests', 'bosh-tests']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['smoke-tests', 'acceptance-tests', 'custom-acceptance-tests', 'custom-broker-acceptance-tests', 'bosh-tests']
       - task: remove-transitional-flag-for-ca
         tags: [colocated-with-web]
@@ -3834,7 +3834,7 @@ jobs:
             CREDHUB_CA_CERT: ((bosh-credhub-ca-cert))
             CREDHUB_SERVER: "https://((bosh_fqdn)):8844/api"
           inputs:
-            - name: paas-cf
+            - name: paas
           run:
             path: sh
             args:
@@ -3843,7 +3843,7 @@ jobs:
               - -c
               - |
                 credhub login
-                ./paas-cf/concourse/scripts/ca-rotation-remove-transitional.rb
+                ./paas/concourse/scripts/ca-rotation-remove-transitional.rb
 
       - task: move-transitional-flag-for-ca
         tags: [colocated-with-web]
@@ -3856,7 +3856,7 @@ jobs:
             CREDHUB_CA_CERT: ((bosh-credhub-ca-cert))
             CREDHUB_SERVER: "https://((bosh_fqdn)):8844/api"
           inputs:
-            - name: paas-cf
+            - name: paas
           run:
             path: sh
             args:
@@ -3865,7 +3865,7 @@ jobs:
               - -c
               - |
                 credhub login
-                ./paas-cf/concourse/scripts/ca-rotation-move-transitional.rb
+                ./paas/concourse/scripts/ca-rotation-move-transitional.rb
 
       - task: set-transitional-flag-for-ca
         tags: [colocated-with-web]
@@ -3878,7 +3878,7 @@ jobs:
             CREDHUB_CA_CERT: ((bosh-credhub-ca-cert))
             CREDHUB_SERVER: "https://((bosh_fqdn)):8844/api"
           inputs:
-            - name: paas-cf
+            - name: paas
           run:
             path: sh
             args:
@@ -3887,7 +3887,7 @@ jobs:
               - -c
               - |
                 credhub login
-                ./paas-cf/concourse/scripts/ca-rotation-set-transitional.rb
+                ./paas/concourse/scripts/ca-rotation-set-transitional.rb
 
   - name: tag-release
     plan:
@@ -3895,7 +3895,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['rotate-certs']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['rotate-certs']
           - get: git-keys
 
@@ -3913,7 +3913,7 @@ jobs:
             OUTPUT_TAG_PREFIX: ((OUTPUT_TAG_PREFIX))
             INPUT_TAG_PREFIX: ((INPUT_TAG_PREFIX))
           inputs:
-          - name: paas-cf
+          - name: paas
           - name: release-version
           - name: git-keys
           run:
@@ -3926,7 +3926,7 @@ jobs:
                 echo \$OUTPUT_TAG_PREFIX not set, skipping
                 exit 0
               fi
-              paas-cf/concourse/scripts/tag_release.sh \
+              paas/concourse/scripts/tag_release.sh \
                 "${OUTPUT_TAG_PREFIX}" "${aws_account}" "${deploy_env}" "${INPUT_TAG_PREFIX}"
 
       - *end-grafana-overview-annotation
@@ -4068,7 +4068,7 @@ jobs:
     serial_groups: [smoke-tests]
     plan:
     - in_parallel:
-      - get: paas-cf
+      - get: paas
       - get: cf-tfstate
 
     - task: rotate-credentials
@@ -4114,7 +4114,7 @@ jobs:
 
     - task: forget-access-keys
       tags: [colocated-with-web]
-      file: paas-cf/concourse/tasks/forget-access-keys.yml
+      file: paas/concourse/tasks/forget-access-keys.yml
       params:
         AWS_DEFAULT_REGION: ((aws_region))
       ensure:
@@ -4192,13 +4192,13 @@ jobs:
     serial: true
     plan:
     - in_parallel:
-      - get: paas-cf
+      - get: paas
       - get: cf-tfstate
       - get: expire-aws-keys-timer
         trigger: true
     - task: forget-access-keys
       tags: [colocated-with-web]
-      file: paas-cf/concourse/tasks/forget-access-keys.yml
+      file: paas/concourse/tasks/forget-access-keys.yml
       params:
         AWS_DEFAULT_REGION: ((aws_region))
       ensure:
@@ -4332,7 +4332,7 @@ jobs:
           trigger: true
         - get: deployed-healthcheck
         - get: cf-smoke-tests-release
-        - get: paas-cf
+        - get: paas
           passed: ['pipeline-lock']
         - get: cf-manifest
           passed: ['post-deploy']
@@ -4365,14 +4365,14 @@ jobs:
       - do:
         - task: create-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/create_admin.yml
+          file: paas/concourse/tasks/create_admin.yml
           params:
             PREFIX: cont-smoketest-user
             UAA_ADMIN_CLIENT_PASS: ((uaa_admin_client_secret))
 
         - task: smoke-tests-config
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/generate-test-config.yml
+          file: paas/concourse/tasks/generate-test-config.yml
           params:
             TEST_PROPERTIES: smoke_tests
             APP_DOMAIN: ((apps_dns_zone_name))
@@ -4381,7 +4381,7 @@ jobs:
 
         - task: smoke-tests-run
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/smoke-tests-run.yml
+          file: paas/concourse/tasks/smoke-tests-run.yml
           params:
             AWS_DEFAULT_REGION: ((aws_region))
             DEPLOY_ENV: ((deploy_env))
@@ -4391,7 +4391,7 @@ jobs:
           ensure:
             task: upload-test-artifacts
             tags: [colocated-with-web]
-            file: paas-cf/concourse/tasks/upload-test-artifacts.yml
+            file: paas/concourse/tasks/upload-test-artifacts.yml
             params:
               TEST_ARTIFACTS_BUCKET: ((test_artifacts_bucket))
 
@@ -4399,7 +4399,7 @@ jobs:
           in_parallel:
             - task: remove-temp-user
               tags: [colocated-with-web]
-              file: paas-cf/concourse/tasks/delete_admin.yml
+              file: paas/concourse/tasks/delete_admin.yml
               params:
                 API_ENDPOINT: ((api_endpoint))
                 CF_ADMIN: ((cf_admin))
@@ -4414,7 +4414,7 @@ jobs:
           trigger: true
         - get: paas-billing
           passed: ['deploy-paas-billing']
-        - get: paas-cf
+        - get: paas
           passed: ['pipeline-lock']
         - get: cf-manifest
           passed: ['post-deploy']
@@ -4422,7 +4422,7 @@ jobs:
       - do:
         - task: create-temp-user
           tags: [colocated-with-web]
-          file: paas-cf/concourse/tasks/create_admin.yml
+          file: paas/concourse/tasks/create_admin.yml
           params:
             PREFIX: cont-billing-smoketest-user
             UAA_ADMIN_CLIENT_PASS: ((uaa_admin_client_secret))
@@ -4437,7 +4437,7 @@ jobs:
               SYSTEM_DNS_ZONE_NAME: ((system_dns_zone_name))
               DEPLOY_ENV: ((deploy_env))
             inputs:
-              - name: paas-cf
+              - name: paas
               - name: paas-billing
                 path: src/github.com/alphagov/paas-billing
               - name: admin-creds
@@ -4459,7 +4459,7 @@ jobs:
           in_parallel:
             - task: remove-temp-user
               tags: [colocated-with-web]
-              file: paas-cf/concourse/tasks/delete_admin.yml
+              file: paas/concourse/tasks/delete_admin.yml
               params:
                 API_ENDPOINT: ((api_endpoint))
                 CF_ADMIN: ((cf_admin))
@@ -4471,7 +4471,7 @@ jobs:
       - in_parallel:
         - get: check-certificates-timer
           trigger: true
-        - get: paas-cf
+        - get: paas
         - get: ipsec-CA
 
       - task: check-certificates
@@ -4485,7 +4485,7 @@ jobs:
             CREDHUB_CA_CERT: ((bosh-credhub-ca-cert))
             CREDHUB_SERVER: "https://((bosh_fqdn)):8844/api"
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: ipsec-CA
           run:
             path: sh
@@ -4494,7 +4494,7 @@ jobs:
               - -c
               - |
                 credhub login
-                ./paas-cf/concourse/scripts/check-certificates.rb 15
+                ./paas/concourse/scripts/check-certificates.rb 15
 
                 tar -xzf ./ipsec-CA/ipsec-CA.tar.gz -C ./ipsec-CA
 
@@ -4505,7 +4505,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: paas-cf
+        - get: paas
 
       - task: cleanup-deleted-cf-users
         tags: [colocated-with-web]
@@ -4513,7 +4513,7 @@ jobs:
           platform: linux
           image_resource: *cf-cli-image-resource
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             SYSTEM_DNS_ZONE_NAME: ((system_dns_zone_name))
             API_ENDPOINT: ((api_endpoint))
@@ -4527,4 +4527,4 @@ jobs:
             - |
               echo | cf login -a "${API_ENDPOINT}" -u "${CF_USER}" -p "${CF_PASS}"
 
-              ./paas-cf/scripts/cleanup-deleted-cf-users.sh --delete
+              ./paas/scripts/cleanup-deleted-cf-users.sh --delete

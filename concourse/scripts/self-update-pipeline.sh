@@ -12,8 +12,8 @@
 set -u
 set -e
 
-if [ ! -d "./paas-cf" ]; then
-  echo "Resource paas-cf must be checkout"
+if [ ! -d "./paas" ]; then
+  echo "Resource paas must be checkout"
   exit 1
 fi
 
@@ -22,5 +22,5 @@ if [ "${SELF_UPDATE_PIPELINE}" != "true" ]; then
 else
   echo "Self update pipeline is enabled. Updating. (set SELF_UPDATE_PIPELINE=false to disable)"
 
-  make -C ./paas-cf "${MAKEFILE_ENV_TARGET}" pipelines
+  make -C ./paas "${MAKEFILE_ENV_TARGET}" pipelines
 fi

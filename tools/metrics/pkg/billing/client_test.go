@@ -12,7 +12,7 @@ import (
 
 	"github.com/jarcoal/httpmock"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/billing"
+	"github.com/alphagov/paas/tools/metrics/pkg/billing"
 )
 
 var _ = Describe("Client", func() {

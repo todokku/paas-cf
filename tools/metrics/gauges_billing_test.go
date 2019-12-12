@@ -5,8 +5,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/billing"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/billing"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 var _ = Describe("Billing Gauges", func() {

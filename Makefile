@@ -95,7 +95,7 @@ lint_shellcheck:
 	find . -name '*.sh' -not -path './.git/*' -not -path '*/vendor/*' -not -path './platform-tests/pkg/*'  -not -path './manifests/cf-deployment/*' -not -path './manifests/prometheus/upstream/*' | xargs shellcheck
 
 lint_concourse:
-	cd .. && SHELLCHECK_OPTS="-e SC1091" python paas-cf/concourse/scripts/pipecleaner.py --fatal-warnings paas-cf/concourse/pipelines/*.yml
+	cd .. && SHELLCHECK_OPTS="-e SC1091" python paas/concourse/scripts/pipecleaner.py --fatal-warnings paas/concourse/pipelines/*.yml
 
 .PHONY: lint_ruby
 lint_ruby:
@@ -325,7 +325,7 @@ find_diverged_forks: ## Check all github forks belonging to paas to see if they'
 	./scripts/find_diverged_forks.py alphagov --prefix=paas --github-token=${GITHUB_TOKEN}
 
 .PHONY: run_job
-run_job: check-env ## Unbind paas-cf of $JOB in create-cloudfoundry pipeline and then trigger it
+run_job: check-env ## Unbind paas git resource of $JOB in create-cloudfoundry pipeline and then trigger it
 	$(if ${JOB},,$(error Must pass JOB=<name>))
 	./concourse/scripts/run_job.sh ${JOB}
 

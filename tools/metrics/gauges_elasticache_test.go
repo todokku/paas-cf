@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/lager"
-	. "github.com/alphagov/paas-cf/tools/metrics"
+	. "github.com/alphagov/paas/tools/metrics"
 	"github.com/aws/aws-sdk-go/aws"
 	awsec "github.com/aws/aws-sdk-go/service/elasticache"
 
@@ -13,9 +13,9 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/elasticache"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/elasticache/fakes"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/elasticache"
+	"github.com/alphagov/paas/tools/metrics/pkg/elasticache/fakes"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 var _ = Describe("Elasticache Gauges", func() {

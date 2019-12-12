@@ -2,11 +2,11 @@
 
 set -eu -o pipefail
 
-PAAS_CF_DIR=${PAAS_CF_DIR:-paas-cf}
+PAAS_DIR=${PAAS_DIR:-paas}
 WORKDIR=${WORKDIR:-.}
 
 opsfile_args=""
-for i in "${PAAS_CF_DIR}"/manifests/cloud-config/operations.d/*.yml; do
+for i in "${PAAS_DIR}"/manifests/cloud-config/operations.d/*.yml; do
   opsfile_args+="-o $i "
 done
 
@@ -16,6 +16,6 @@ bosh interpolate \
   --vars-file="${WORKDIR}/terraform-outputs/vpc.yml" \
   --vars-file="${WORKDIR}/terraform-outputs/bosh.yml" \
   --vars-file="${WORKDIR}/terraform-outputs/cf.yml" \
-  --vars-file="${PAAS_CF_DIR}/manifests/variables.yml" \
+  --vars-file="${PAAS_DIR}/manifests/variables.yml" \
   ${opsfile_args} \
-  "${PAAS_CF_DIR}/manifests/cloud-config/paas-cf-cloud-config.yml"
+  "${PAAS_DIR}/manifests/cloud-config/paas-cf-cloud-config.yml"

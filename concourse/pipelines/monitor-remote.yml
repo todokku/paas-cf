@@ -7,12 +7,12 @@ resource_types:
     tag: 97e441efbfb06ac7fb09786fd74c64b05f9cc907
 
 resources:
-- name: paas-cf
+- name: paas
   type: git
   source:
-    uri: https://github.com/alphagov/paas-cf.git
+    uri: https://github.com/alphagov/paas.git
     branch: ((branch_name))
-    tag_filter: ((paas_cf_tag_filter))
+    tag_filter: ((paas_tag_filter))
     commit_verification_keys: ((gpg_public_keys))
 
 - name: cf-smoke-tests-release
@@ -38,7 +38,7 @@ jobs:
 - name: self-update-pipeline
   serial: true
   plan:
-  - get: paas-cf
+  - get: paas
     trigger: true
   - task: self-update-pipeline
     tags: [colocated-with-web]
@@ -50,7 +50,7 @@ jobs:
           repository: governmentpaas/self-update-pipelines
           tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
       inputs:
-      - name: paas-cf
+      - name: paas
       params:
         DEPLOY_ENV: ((deploy_env))
         BRANCH: ((branch_name))
@@ -68,20 +68,20 @@ jobs:
         MONITORED_AWS_REGION: ((monitored_aws_region))
         CONCOURSE_WEB_PASSWORD: ((concourse_web_password))
       run:
-        path: ./paas-cf/concourse/scripts/self-update-pipeline.sh
+        path: ./paas/concourse/scripts/self-update-pipeline.sh
 
 - name: smoke-tests
   serial: true
   plan:
   - in_parallel:
     - get: test-config
-    - get: paas-cf
+    - get: paas
     - get: cf-smoke-tests-release
     - get: every-5m
       trigger: true
   - task: smoke-tests-run
     tags: [colocated-with-web]
-    file: paas-cf/concourse/tasks/smoke-tests-run.yml
+    file: paas/concourse/tasks/smoke-tests-run.yml
     params:
       AWS_DEFAULT_REGION: ((aws_region))
       DEPLOY_ENV: ((deploy_env))
@@ -93,6 +93,6 @@ jobs:
     ensure:
       task: upload-test-artifacts
       tags: [colocated-with-web]
-      file: paas-cf/concourse/tasks/upload-test-artifacts.yml
+      file: paas/concourse/tasks/upload-test-artifacts.yml
       params:
         TEST_ARTIFACTS_BUCKET: ((test_artifacts_bucket))

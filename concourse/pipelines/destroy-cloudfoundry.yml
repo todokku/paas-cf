@@ -13,12 +13,12 @@ resource_types:
     tag: f2a80c95481056aa57d837e3b14f0012b542fdb3
 
 resources:
-  - name: paas-cf
+  - name: paas
     type: git
     source:
-      uri: https://github.com/alphagov/paas-cf.git
+      uri: https://github.com/alphagov/paas.git
       branch: ((branch_name))
-      tag_filter: ((paas_cf_tag_filter))
+      tag_filter: ((paas_tag_filter))
       commit_verification_keys: ((gpg_public_keys))
 
   - name: cf-tfstate
@@ -81,7 +81,7 @@ jobs:
   - name: init
     serial: true
     plan:
-      - get: paas-cf
+      - get: paas
       - task: self-update-pipeline
         tags: [colocated-with-web]
         config:
@@ -92,7 +92,7 @@ jobs:
               repository: governmentpaas/self-update-pipelines
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             DEPLOY_ENV: ((deploy_env))
             BRANCH: ((branch_name))
@@ -105,7 +105,7 @@ jobs:
             NEW_ACCOUNT_EMAIL_ADDRESS: ((NEW_ACCOUNT_EMAIL_ADDRESS))
             CONCOURSE_WEB_PASSWORD: ((concourse_web_password))
           run:
-            path: ./paas-cf/concourse/scripts/self-update-pipeline.sh
+            path: ./paas/concourse/scripts/self-update-pipeline.sh
       - put: pipeline-trigger
         params: {bump: patch}
 
@@ -118,17 +118,17 @@ jobs:
             passed: ['init']
             trigger: true
           - get: bosh-vars-store
-          - get: paas-cf
+          - get: paas
           - get: cf-manifest
           - get: bosh-CA-crt
 
       - task: get-cf-cli-config
         tags: [colocated-with-web]
-        file: paas-cf/concourse/tasks/get-cf-cli-config.yml
+        file: paas/concourse/tasks/get-cf-cli-config.yml
 
       - task: remove-healthcheck-db
         tags: [colocated-with-web]
-        file: paas-cf/concourse/tasks/remove-db.yml
+        file: paas/concourse/tasks/remove-db.yml
         params:
           ORG: admin
           SPACE: healthchecks
@@ -137,7 +137,7 @@ jobs:
 
       - task: remove-billing-db
         tags: [colocated-with-web]
-        file: paas-cf/concourse/tasks/remove-db.yml
+        file: paas/concourse/tasks/remove-db.yml
         params:
           ORG: admin
           SPACE: billing
@@ -146,7 +146,7 @@ jobs:
 
       - task: remove-accounts-db
         tags: [colocated-with-web]
-        file: paas-cf/concourse/tasks/remove-db.yml
+        file: paas/concourse/tasks/remove-db.yml
         params:
           ORG: admin
           SPACE: billing
@@ -164,7 +164,7 @@ jobs:
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           inputs:
             - name: bosh-vars-store
-            - name: paas-cf
+            - name: paas
             - name: bosh-CA-crt
           params:
             BOSH_ENVIRONMENT: ((bosh_fqdn))
@@ -177,7 +177,7 @@ jobs:
               - -e
               - -c
               - |
-                VAL_FROM_YAML=$(pwd)/paas-cf/concourse/scripts/val_from_yaml.rb
+                VAL_FROM_YAML=$(pwd)/paas/concourse/scripts/val_from_yaml.rb
                 BOSH_CLIENT='admin'
                 BOSH_CLIENT_SECRET=$($VAL_FROM_YAML admin_password bosh-vars-store/bosh-vars-store.yml)
                 export BOSH_CLIENT
@@ -199,7 +199,7 @@ jobs:
           - get: pipeline-trigger
             passed: ['delete-deployment']
             trigger: true
-          - get: paas-cf
+          - get: paas
             passed: ['delete-deployment']
           - get: cf-tfstate
           - get: concourse-tfstate
@@ -215,7 +215,7 @@ jobs:
               repository: ruby
               tag: 2.5-slim
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: cf-tfstate
             - name: concourse-tfstate
             - name: vpc-tfstate
@@ -227,13 +227,13 @@ jobs:
               - -e
               - -c
               - |
-                ruby paas-cf/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
+                ruby paas/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
                 < cf-tfstate/cf.tfstate > terraform-variables/cf.tfvars.sh
                 ls -l terraform-variables/cf.tfvars.sh
-                ruby paas-cf/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
+                ruby paas/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
                 < concourse-tfstate/concourse.tfstate > terraform-variables/concourse.tfvars.sh
                 ls -l terraform-variables/concourse.tfvars.sh
-                ruby paas-cf/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
+                ruby paas/concourse/scripts/extract_tf_vars_from_terraform_state.rb \
                 < vpc-tfstate/vpc.tfstate > terraform-variables/vpc.tfvars.sh
                 ls -l terraform-variables/vpc.tfvars.sh
 
@@ -259,7 +259,7 @@ jobs:
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           inputs:
             - name: terraform-variables
-            - name: paas-cf
+            - name: paas
             - name: cf-tfstate
           outputs:
             - name: updated-cf-tfstate
@@ -281,11 +281,11 @@ jobs:
                 . terraform-variables/cf-secrets.tfvars.sh
 
                 cp cf-tfstate/cf.tfstate updated-cf-tfstate/cf.tfstate
-                terraform init paas-cf/terraform/cloudfoundry
+                terraform init paas/terraform/cloudfoundry
                 terraform destroy -force -var env="((deploy_env))" \
-                  -var-file="paas-cf/terraform/((aws_account)).tfvars" \
-                  -var-file="paas-cf/terraform/((aws_region)).tfvars" \
-                  -state=updated-cf-tfstate/cf.tfstate paas-cf/terraform/cloudfoundry
+                  -var-file="paas/terraform/((aws_account)).tfvars" \
+                  -var-file="paas/terraform/((aws_region)).tfvars" \
+                  -state=updated-cf-tfstate/cf.tfstate paas/terraform/cloudfoundry
         ensure:
           put: cf-tfstate
           params:

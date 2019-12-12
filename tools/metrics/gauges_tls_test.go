@@ -10,15 +10,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscf "github.com/aws/aws-sdk-go/service/cloudfront"
 
-	. "github.com/alphagov/paas-cf/tools/metrics"
+	. "github.com/alphagov/paas/tools/metrics"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudfront"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudfront/fakes"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
-	tlscheck_fakes "github.com/alphagov/paas-cf/tools/metrics/pkg/tlscheck/fakes"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudfront"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudfront/fakes"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
+	tlscheck_fakes "github.com/alphagov/paas/tools/metrics/pkg/tlscheck/fakes"
 )
 
 func ExpectMetric(metric m.Metric, name string, value int, host string) {

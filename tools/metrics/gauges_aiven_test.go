@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/aiven"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/aiven/fakes"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/aiven"
+	"github.com/alphagov/paas/tools/metrics/pkg/aiven/fakes"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 var _ = Describe("Aiven", func() {

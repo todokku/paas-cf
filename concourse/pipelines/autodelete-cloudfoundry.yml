@@ -13,12 +13,12 @@ resource_types:
     tag: f2a80c95481056aa57d837e3b14f0012b542fdb3
 
 resources:
-  - name: paas-cf
+  - name: paas
     type: git
     source:
-      uri: https://github.com/alphagov/paas-cf.git
+      uri: https://github.com/alphagov/paas.git
       branch: ((branch_name))
-      tag_filter: ((paas_cf_tag_filter))
+      tag_filter: ((paas_tag_filter))
       commit_verification_keys: ((gpg_public_keys))
 
   - name: cf-manifest
@@ -63,17 +63,17 @@ jobs:
       - get: delete-timer
         trigger: true
       - get: bosh-vars-store
-      - get: paas-cf
+      - get: paas
       - get: cf-manifest
       - get: bosh-CA-crt
 
       - task: get-cf-cli-config
         tags: [colocated-with-web]
-        file: paas-cf/concourse/tasks/get-cf-cli-config.yml
+        file: paas/concourse/tasks/get-cf-cli-config.yml
 
       - task: remove-healthcheck-db
         tags: [colocated-with-web]
-        file: paas-cf/concourse/tasks/remove-db.yml
+        file: paas/concourse/tasks/remove-db.yml
         params:
           ORG: admin
           SPACE: healthchecks
@@ -82,7 +82,7 @@ jobs:
 
       - task: remove-billing-db
         tags: [colocated-with-web]
-        file: paas-cf/concourse/tasks/remove-db.yml
+        file: paas/concourse/tasks/remove-db.yml
         params:
           ORG: admin
           SPACE: billing
@@ -91,7 +91,7 @@ jobs:
 
       - task: remove-accounts-db
         tags: [colocated-with-web]
-        file: paas-cf/concourse/tasks/remove-db.yml
+        file: paas/concourse/tasks/remove-db.yml
         params:
           ORG: admin
           SPACE: billing
@@ -108,12 +108,12 @@ jobs:
               repository: alpine
               tag: 3.7
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             DEPLOY_ENV: ((deploy_env))
             SKIP_AWAIT: ((skip_autodelete_await))
           run:
-            path: ./paas-cf/concourse/scripts/sleep_for_deploy_env.sh
+            path: ./paas/concourse/scripts/sleep_for_deploy_env.sh
 
       - task: delete-deployments
         tags: [colocated-with-web]
@@ -122,7 +122,7 @@ jobs:
           inputs:
             - name: delete-timer
             - name: bosh-vars-store
-            - name: paas-cf
+            - name: paas
             - name: bosh-CA-crt
           params:
             BOSH_ENVIRONMENT: ((bosh_fqdn))
@@ -140,7 +140,7 @@ jobs:
               - -e
               - -c
               - |
-                VAL_FROM_YAML=$(pwd)/paas-cf/concourse/scripts/val_from_yaml.rb
+                VAL_FROM_YAML=$(pwd)/paas/concourse/scripts/val_from_yaml.rb
                 BOSH_CLIENT='admin'
                 BOSH_CLIENT_SECRET=$($VAL_FROM_YAML admin_password bosh-vars-store/bosh-vars-store.yml)
                 export BOSH_CLIENT
@@ -161,7 +161,7 @@ jobs:
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             AWS_DEFAULT_REGION: ((aws_region))
             DEPLOY_ENV: ((deploy_env))
@@ -171,6 +171,6 @@ jobs:
               repository: governmentpaas/awscli
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           run:
-            path: ./paas-cf/concourse/scripts/rds_instances.sh
+            path: ./paas/concourse/scripts/rds_instances.sh
             args:
               - stop

@@ -9,7 +9,7 @@ import (
 
 	"github.com/cloudfoundry-community/go-cfclient"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 func QuotaGauge(c *Client, interval time.Duration) m.MetricReadCloser {

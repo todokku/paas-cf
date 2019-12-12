@@ -8,8 +8,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudfront"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudfront/fakes"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudfront"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudfront/fakes"
 )
 
 var _ = Describe("CloudFront", func() {

@@ -7,9 +7,9 @@ import (
 	"code.cloudfoundry.org/lager"
 	awsec "github.com/aws/aws-sdk-go/service/elasticache"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/elasticache"
+	"github.com/alphagov/paas/tools/metrics/pkg/elasticache"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 func ElasticCacheInstancesGauge(

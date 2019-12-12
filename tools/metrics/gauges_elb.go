@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/lager"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/pingdumb"
+	"github.com/alphagov/paas/tools/metrics/pkg/pingdumb"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 func ELBNodeFailureCountGauge(

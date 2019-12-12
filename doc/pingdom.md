@@ -4,7 +4,7 @@
 
 The checks are defined in terraform configuration file `terraform/pingdom/pingdom.tf`.
 
-The IDs of the contacts to be notified are stored in `paas-cf/terraform/${AWS_ACCOUNT}.tfvars`.
+The IDs of the contacts to be notified are stored in `paas/terraform/${AWS_ACCOUNT}.tfvars`.
 
 ### Requirements
 

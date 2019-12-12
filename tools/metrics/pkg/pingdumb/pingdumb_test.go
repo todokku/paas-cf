@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/alphagov/paas-cf/tools/metrics/fakes"
-	. "github.com/alphagov/paas-cf/tools/metrics/pkg/pingdumb"
+	"github.com/alphagov/paas/tools/metrics/fakes"
+	. "github.com/alphagov/paas/tools/metrics/pkg/pingdumb"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

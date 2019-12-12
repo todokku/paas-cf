@@ -9,7 +9,7 @@ import (
 
 	"code.cloudfoundry.org/lager"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 type ECBCurrencyRatesResponse struct {

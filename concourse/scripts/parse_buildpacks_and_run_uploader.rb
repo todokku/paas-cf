@@ -14,7 +14,7 @@ yaml['buildpacks'].each do |bp|
       raise "Key '#{testkey}' is missing or empty in buildpack configuration:\n#{bp}"
     end
   end
-  system('./paas-cf/concourse/scripts/upload-buildpack.sh',
+  system('./paas/concourse/scripts/upload-buildpack.sh',
          bp['name'],
          bp['stack'].to_s,
          bp['filename'].to_s,

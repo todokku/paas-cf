@@ -1,4 +1,4 @@
-module github.com/alphagov/paas-cf/platform-tests/example-apps/healthcheck
+module github.com/alphagov/paas/platform-tests/example-apps/healthcheck
 
 go 1.13
 

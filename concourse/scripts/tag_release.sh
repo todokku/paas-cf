@@ -10,7 +10,7 @@ INPUT_TAG_PREFIX="${4:-""}"
 
 GIT_EMAIL="the-multi-cloud-paas-team+deployer-ci@digital.cabinet-office.gov.uk"
 GIT_USER="gov-paas-${DEPLOY_ENV}"
-GIT_REPO_URL="${GIT_REPO_URL:-git@github.com:alphagov/paas-cf.git}"
+GIT_REPO_URL="${GIT_REPO_URL:-git@github.com:alphagov/paas.git}"
 
 echo Configure SSH
 tar xzf git-keys/git-keys.tar.gz
@@ -53,7 +53,7 @@ create_new_tag(){
   echo "${OUTPUT_TAG_PREFIX}${version}"
 }
 
-cd paas-cf
+cd paas
 git fetch --tags
 check_already_tagged "${OUTPUT_TAG_PREFIX}"
 

@@ -6,8 +6,8 @@ import (
 	"code.cloudfoundry.org/lager"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/s3"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/s3"
 )
 
 func S3BucketsGauge(

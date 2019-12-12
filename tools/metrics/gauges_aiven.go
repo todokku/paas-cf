@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/aiven"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/aiven"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 func AivenCostGauge(client *aiven.Client, interval time.Duration) m.MetricReadCloser {

@@ -6,7 +6,7 @@ image_resource:
     repository: ruby
     tag: 2.5-slim
 inputs:
-  - name: paas-cf
+  - name: paas
 run:
   path: ruby
   args:
@@ -49,7 +49,7 @@ run:
       grafana_pass  = ENV.fetch('GRAFANA_PASS')
 
       users_that_should_exist = YAML.load_file(
-        "#{Dir.pwd}/paas-cf/config/users.yml"
+        "#{Dir.pwd}/paas/config/users.yml"
       ).reject do |u|
         u.dig('email').nil?
       end.map do |u|

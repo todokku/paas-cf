@@ -48,7 +48,7 @@ private
     copy_fixture_file('pagerduty-secrets.yml', "#{workdir}/pagerduty-secrets")
 
     env = fake_env_vars
-    env['PAAS_CF_DIR'] = root.to_s
+    env['PAAS_DIR'] = root.to_s
     env['WORKDIR'] = workdir
     env['VARS_STORE'] = vars_store.path
 

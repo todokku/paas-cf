@@ -1,12 +1,11 @@
 package emails
 
 import (
-	"github.com/alphagov/paas-cf/tools/user_emails/utils"
+	"github.com/alphagov/paas/tools/user_emails/utils"
 	"github.com/xenolf/lego/log"
 	"os"
 	"regexp"
 )
-
 
 var email_regex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
@@ -28,7 +27,7 @@ func FetchEmails(client Client, isCritical bool) []string {
 		case false:
 			u := normal(client, org.Guid)
 			for _, usr := range u {
-				if _, ok := usersIdentity[usr]; !ok{
+				if _, ok := usersIdentity[usr]; !ok {
 					users = append(users, usr)
 					usersIdentity[usr] = true
 				}
@@ -36,7 +35,7 @@ func FetchEmails(client Client, isCritical bool) []string {
 		case true:
 			u := critical(client, org.Guid)
 			for _, usr := range u {
-				if _, ok := usersIdentity[usr]; !ok{
+				if _, ok := usersIdentity[usr]; !ok {
 					users = append(users, usr)
 					usersIdentity[usr] = true
 				}
@@ -53,11 +52,11 @@ func validEmail(address string) bool {
 	return valid
 }
 
-func normal(client Client, orgs string ) []string {
+func normal(client Client, orgs string) []string {
 	var devs []string
 
-	targetOrg := map[string] []string {
-		"organization_guid": []string{ orgs },
+	targetOrg := map[string][]string{
+		"organization_guid": []string{orgs},
 	}
 	spaces, err := client.ListSpacesByQuery(targetOrg)
 	if err != nil {
@@ -79,12 +78,12 @@ func normal(client Client, orgs string ) []string {
 	return devs
 }
 
-func critical(client Client, orgs string ) []string  {
+func critical(client Client, orgs string) []string {
 
 	var users []string
 
-	targetOrg := map[string] []string {
-		"organization_guid": []string{ orgs },
+	targetOrg := map[string][]string{
+		"organization_guid": []string{orgs},
 	}
 	spaces, err := client.ListSpacesByQuery(targetOrg)
 	if err != nil {

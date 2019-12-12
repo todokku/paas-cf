@@ -12,7 +12,7 @@ These filters can be manually updated in the logit interface. To generate the fi
 
 ## How to generate the Logit Logstash filters
 
-Ensure the `LOGSEARCH_BOSHRELEASE_TAG` and `LOGSEARCH_FOR_CLOUDFOUNDRY_TAG` variables towards the top of the `Makefile` have the correct values. Run `make logit-filters` from the paas-cf directory. This uses docker to update `config/logit/output/generated_logit_filters.conf`.
+Ensure the `LOGSEARCH_BOSHRELEASE_TAG` and `LOGSEARCH_FOR_CLOUDFOUNDRY_TAG` variables towards the top of the `Makefile` have the correct values. Run `make logit-filters` from the paas directory. This uses docker to update `config/logit/output/generated_logit_filters.conf`.
 
 ## Component configuration files
 

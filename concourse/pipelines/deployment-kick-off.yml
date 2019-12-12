@@ -1,11 +1,11 @@
 ---
 resources:
-  - name: paas-cf
+  - name: paas
     type: git
     source:
-      uri: https://github.com/alphagov/paas-cf.git
+      uri: https://github.com/alphagov/paas.git
       branch: ((branch_name))
-      tag_filter: ((paas_cf_tag_filter))
+      tag_filter: ((paas_tag_filter))
       commit_verification_keys: ((gpg_public_keys))
 
   - name: deployment-timer
@@ -22,7 +22,7 @@ jobs:
     plan:
       - get: deployment-timer
         trigger: true
-      - get: paas-cf
+      - get: paas
       - task: await-turn
         tags: [colocated-with-web]
         config:
@@ -33,12 +33,12 @@ jobs:
               repository: alpine
               tag: 3.7
           inputs:
-            - name: paas-cf
+            - name: paas
             - name: deployment-timer
           params:
             DEPLOY_ENV: ((deploy_env))
           run:
-            path: ./paas-cf/concourse/scripts/sleep_for_deploy_env.sh
+            path: ./paas/concourse/scripts/sleep_for_deploy_env.sh
 
   - name: kick-off
     serial: true
@@ -46,14 +46,14 @@ jobs:
       - get: deployment-timer
         trigger: true
         passed: [await-kick-off]
-      - get: paas-cf
+      - get: paas
 
       - task: startup-rds-instances
         tags: [colocated-with-web]
         config:
           platform: linux
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             AWS_DEFAULT_REGION: ((aws_region))
             DEPLOY_ENV: ((deploy_env))
@@ -63,7 +63,7 @@ jobs:
               repository: governmentpaas/awscli
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           run:
-            path: ./paas-cf/concourse/scripts/rds_instances.sh
+            path: ./paas/concourse/scripts/rds_instances.sh
             args:
               - start
 
@@ -77,7 +77,7 @@ jobs:
               repository: governmentpaas/self-update-pipelines
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             AWS_DEFAULT_REGION: ((aws_region))
             CONCOURSE_WEB_PASSWORD: ((concourse_web_password))
@@ -91,14 +91,14 @@ jobs:
               - |
                 echo "Pipeline kick-off is enabled. Updating. (set ENABLE_MORNING_DEPLOYMENT=false to disable)"
 
-                make -C ./paas-cf "((makefile_env_target))" trigger-deploy
+                make -C ./paas "((makefile_env_target))" trigger-deploy
 
   - name: pause-kick-off
     serial: true
     plan:
       - get: deployment-timer
         trigger: true
-      - get: paas-cf
+      - get: paas
       - task: pause-kick-off
         tags: [colocated-with-web]
         config:
@@ -109,7 +109,7 @@ jobs:
               repository: governmentpaas/self-update-pipelines
               tag: 91fe1e826f39798986d95a02fb1ccab6f0e7c746
           inputs:
-            - name: paas-cf
+            - name: paas
           params:
             AWS_DEFAULT_REGION: ((aws_region))
             CONCOURSE_WEB_PASSWORD: ((concourse_web_password))
@@ -121,4 +121,4 @@ jobs:
               - -e
               - -c
               - |
-                make -C ./paas-cf "((makefile_env_target))" pause-kick-off
+                make -C ./paas "((makefile_env_target))" pause-kick-off

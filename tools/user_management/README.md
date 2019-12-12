@@ -1,4 +1,4 @@
-# `paas-cf/tools/user_management`
+# `paas/tools/user_management`
 
 This folder contains a User Management tool for controlling which users have global permissions on the PaaS. For instance it enforces who has `cloud_controller.admin` or `cloud_controller.global_auditor`. We're starting to run this as part of our pipelines.
 

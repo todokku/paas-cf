@@ -8,9 +8,9 @@ import (
 
 	"code.cloudfoundry.org/lager"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudfront"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/tlscheck"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudfront"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/tlscheck"
 )
 
 func TLSValidityGauge(

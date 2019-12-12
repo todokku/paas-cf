@@ -1,7 +1,7 @@
 ---
 platform: linux
 inputs:
-  - name: paas-cf
+  - name: paas
   - name: config
 image_resource:
   type: docker-image

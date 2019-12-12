@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/lager"
-	. "github.com/alphagov/paas-cf/tools/metrics"
-	"github.com/alphagov/paas-cf/tools/metrics/fakes"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/pingdumb"
+	. "github.com/alphagov/paas/tools/metrics"
+	"github.com/alphagov/paas/tools/metrics/fakes"
+	"github.com/alphagov/paas/tools/metrics/pkg/pingdumb"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -15,9 +15,9 @@ PINGDOM_API_KEY=$(pass pingdom.com/app-key/govuk-paas-terraform)
 PINGDOM_ACCOUNT_EMAIL=$(pass pingdom.com/account_email)
 
 # Install Terraform plugin to temporary directory
-PAAS_CF_DIR=$(pwd)
+PAAS_DIR=$(pwd)
 WORKING_DIR=$(mktemp -d terraform-pingdom.XXXXXX)
-trap 'rm -r "${PAAS_CF_DIR}/${WORKING_DIR}"' EXIT
+trap 'rm -r "${PAAS_DIR}/${WORKING_DIR}"' EXIT
 
 if [ ! -d bin/ ]; then
   mkdir bin/
@@ -26,11 +26,11 @@ fi
 #wget can only check timestamp on a file in work dir
 cd bin/
 wget -N "https://github.com/alphagov/paas-terraform-provider-pingdom/releases/download/${PLUGIN_VERSION}/${BINARY}"
-cp ./"${BINARY}" "${PAAS_CF_DIR}"/"${WORKING_DIR}"/terraform-provider-pingdom
-chmod +x "${PAAS_CF_DIR}"/"${WORKING_DIR}"/terraform-provider-pingdom
+cp ./"${BINARY}" "${PAAS_DIR}"/"${WORKING_DIR}"/terraform-provider-pingdom
+chmod +x "${PAAS_DIR}"/"${WORKING_DIR}"/terraform-provider-pingdom
 
 # Work in tmp dir to ensure there's no local state before we kick off terraform, it prioritises it
-cd "${PAAS_CF_DIR}"/"${WORKING_DIR}"
+cd "${PAAS_DIR}"/"${WORKING_DIR}"
 
 # Initialise Terraform with remote state.
 terraform init \
@@ -38,11 +38,11 @@ terraform init \
   -backend-config="bucket=gds-paas-${DEPLOY_ENV}-state" \
   -backend-config="key=${STATEFILE}" \
   -backend-config="region=${AWS_DEFAULT_REGION}" \
-  "${PAAS_CF_DIR}"/terraform/pingdom
+  "${PAAS_DIR}"/terraform/pingdom
 
 # Run Terraform Pingdom Provider
 terraform "${TERRAFORM_ACTION}" \
-	-var-file="${PAAS_CF_DIR}/terraform/${AWS_ACCOUNT}.tfvars" \
+	-var-file="${PAAS_DIR}/terraform/${AWS_ACCOUNT}.tfvars" \
 	-var "env=${DEPLOY_ENV}" \
 	-var "pingdom_user=${PINGDOM_USER}" \
 	-var "pingdom_password=${PINGDOM_PASSWORD}" \
@@ -50,4 +50,4 @@ terraform "${TERRAFORM_ACTION}" \
 	-var "pingdom_account_email=${PINGDOM_ACCOUNT_EMAIL}" \
 	-var "apps_dns_zone_name=${APPS_DNS_ZONE_NAME}" \
 	-var "system_dns_zone_name=${SYSTEM_DNS_ZONE_NAME}" \
-  "${PAAS_CF_DIR}"/terraform/pingdom
+  "${PAAS_DIR}"/terraform/pingdom

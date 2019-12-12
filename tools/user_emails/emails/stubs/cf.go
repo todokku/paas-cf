@@ -2,7 +2,7 @@ package stubs
 
 import (
 	"errors"
-	"github.com/alphagov/paas-cf/tools/user_emails/emails/fakes"
+	"github.com/alphagov/paas/tools/user_emails/emails/fakes"
 	"github.com/cloudfoundry-community/go-cfclient"
 	"net/url"
 )
@@ -172,5 +172,3 @@ func (cf *StubCF) ListOrgAuditors(orgGUID string) ([]cfclient.User, error) {
 
 	return nil, errors.New("unknown org guid")
 }
-
-

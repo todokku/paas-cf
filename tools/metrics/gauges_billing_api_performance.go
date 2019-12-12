@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/logit"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/logit"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 type BillingApiHitLabels struct {

@@ -71,20 +71,20 @@ var _ = Describe("TagRelease", func() {
 		})
 
 		It("creates a tag using the given tag_prefix and version, and pushes it", func() {
-			cloneRepository(baseCmd, "paas-cf")
+			cloneRepository(baseCmd, "paas")
 			runBashScript(baseCmd, `
 				./tag_release.sh next- test_aws_account test_env ""
 			`)
 
 			session := runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git tag -l "next-*"
 			`)
 			Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.42"))
 
-			cloneRepository(baseCmd, "paas-cf-new")
+			cloneRepository(baseCmd, "paas-new")
 			session = runBashScript(baseCmd, `
-				cd paas-cf-new
+				cd paas-new
 				git tag -l "next-*"
 			`)
 			Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.42"))
@@ -95,13 +95,13 @@ var _ = Describe("TagRelease", func() {
 				cd origin_repo
 				git tag next-0.0.40
 			`)
-			cloneRepository(baseCmd, "paas-cf")
+			cloneRepository(baseCmd, "paas")
 			runBashScript(baseCmd, `
 				./tag_release.sh next- test_aws_account test_env ""
 			`)
 
 			session := runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git tag -l "next-*"
 			`)
 			Expect(string(session.Out.Contents())).NotTo(ContainSubstring("next-0.0.42"))
@@ -112,22 +112,22 @@ var _ = Describe("TagRelease", func() {
 				cd origin_repo
 				git tag next-foo-0.0.40
 			`)
-			cloneRepository(baseCmd, "paas-cf")
+			cloneRepository(baseCmd, "paas")
 			runBashScript(baseCmd, `
 				./tag_release.sh next- test_aws_account test_env ""
 			`)
 
 			session := runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git tag -l "next-*"
 			`)
 			Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.42"))
 		})
 
 		It("tags the HEAD revision of the checked out repo", func() {
-			cloneRepository(baseCmd, "paas-cf")
+			cloneRepository(baseCmd, "paas")
 			session := runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git commit --quiet --allow-empty -m "Third commit"
 				git checkout --quiet HEAD^
 				git rev-parse HEAD
@@ -138,7 +138,7 @@ var _ = Describe("TagRelease", func() {
 			`)
 
 			session = runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git rev-list -n 1 next-0.0.42
 			`)
 			actualCommitHash := strings.TrimSpace(string(session.Out.Contents()))
@@ -147,7 +147,7 @@ var _ = Describe("TagRelease", func() {
 
 		Context("if the remote copy of the origin repo already has the new tag, but the local copy not", func() {
 			BeforeEach(func() {
-				cloneRepository(baseCmd, "paas-cf")
+				cloneRepository(baseCmd, "paas")
 				runBashScript(baseCmd, `
 					cd origin_repo
 					git tag next-0.0.42
@@ -164,7 +164,7 @@ var _ = Describe("TagRelease", func() {
 				)
 
 				session = runBashScript(baseCmd, `
-					cd paas-cf
+					cd paas
 					git tag -l "next-*"
 				`)
 				Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.42"))
@@ -186,14 +186,14 @@ var _ = Describe("TagRelease", func() {
 		})
 
 		It("promotes the tag matching the INPUT_TAG_PREFIX", func() {
-			cloneRepository(baseCmd, "paas-cf")
+			cloneRepository(baseCmd, "paas")
 
 			runBashScript(baseCmd, `
 				./tag_release.sh next- test_aws_account test_env "previous-"
 			`)
 
 			session := runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git tag -l "next-*"
 			`)
 			Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.2"))
@@ -206,14 +206,14 @@ var _ = Describe("TagRelease", func() {
 				git tag previous-foo-0.0.5
 			`)
 
-			cloneRepository(baseCmd, "paas-cf")
+			cloneRepository(baseCmd, "paas")
 
 			runBashScript(baseCmd, `
 				./tag_release.sh next- test_aws_account test_env "previous-"
 			`)
 
 			session := runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git tag -l "next-*"
 			`)
 			Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.2"))
@@ -221,9 +221,9 @@ var _ = Describe("TagRelease", func() {
 		})
 
 		It("promotes the tag pointing at the HEAD commit", func() {
-			cloneRepository(baseCmd, "paas-cf")
+			cloneRepository(baseCmd, "paas")
 			runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git checkout previous-0.0.1
 			`)
 
@@ -232,7 +232,7 @@ var _ = Describe("TagRelease", func() {
 			`)
 
 			session := runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git tag -l "next-*"
 			`)
 			Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.1"))
@@ -240,9 +240,9 @@ var _ = Describe("TagRelease", func() {
 		})
 
 		It("creates the new tag pointing at the correct revision", func() {
-			cloneRepository(baseCmd, "paas-cf")
+			cloneRepository(baseCmd, "paas")
 			session := runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git checkout --quiet previous-0.0.1
 				git rev-parse HEAD
 			`)
@@ -253,7 +253,7 @@ var _ = Describe("TagRelease", func() {
 			`)
 
 			session = runBashScript(baseCmd, `
-				cd paas-cf
+				cd paas
 				git rev-list -n 1 next-0.0.1
 			`)
 			actualCommitHash := strings.TrimSpace(string(session.Out.Contents()))
@@ -271,14 +271,14 @@ var _ = Describe("TagRelease", func() {
 			})
 
 			It("promotes the highest versioned tag pointing at HEAD", func() {
-				cloneRepository(baseCmd, "paas-cf")
+				cloneRepository(baseCmd, "paas")
 
 				runBashScript(baseCmd, `
 					./tag_release.sh next- test_aws_account test_env "previous-"
 				`)
 
 				session := runBashScript(baseCmd, `
-					cd paas-cf
+					cd paas
 					git tag -l "next-*"
 				`)
 				Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.4"))
@@ -292,14 +292,14 @@ var _ = Describe("TagRelease", func() {
 					cd origin_repo
 					git tag previous-0.0.11
 				`)
-				cloneRepository(baseCmd, "paas-cf")
+				cloneRepository(baseCmd, "paas")
 
 				runBashScript(baseCmd, `
 					./tag_release.sh next- test_aws_account test_env "previous-"
 				`)
 
 				session := runBashScript(baseCmd, `
-					cd paas-cf
+					cd paas
 					git tag -l "next-*"
 				`)
 				Expect(string(session.Out.Contents())).To(ContainSubstring("next-0.0.11"))

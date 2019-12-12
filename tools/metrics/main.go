@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/logit"
+	"github.com/alphagov/paas/tools/metrics/pkg/logit"
 	"log"
 	"net/http"
 	"os"
@@ -16,23 +16,23 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/pingdumb"
+	"github.com/alphagov/paas/tools/metrics/pkg/pingdumb"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/costexplorer"
 	"github.com/pkg/errors"
 
 	"code.cloudfoundry.org/lager"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/aiven"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudfront"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/cloudwatch"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/debug"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/elasticache"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/s3"
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/tlscheck"
+	"github.com/alphagov/paas/tools/metrics/pkg/aiven"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudfront"
+	"github.com/alphagov/paas/tools/metrics/pkg/cloudwatch"
+	"github.com/alphagov/paas/tools/metrics/pkg/debug"
+	"github.com/alphagov/paas/tools/metrics/pkg/elasticache"
+	"github.com/alphagov/paas/tools/metrics/pkg/s3"
+	"github.com/alphagov/paas/tools/metrics/pkg/tlscheck"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
-	promrep "github.com/alphagov/paas-cf/tools/metrics/pkg/prometheus_reporter"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
+	promrep "github.com/alphagov/paas/tools/metrics/pkg/prometheus_reporter"
 )
 
 func getHTTPPort() int {

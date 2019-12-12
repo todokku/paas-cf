@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/alphagov/paas-cf/tools/user_emails/emails"
+	"github.com/alphagov/paas/tools/user_emails/emails"
 	"github.com/cloudfoundry-community/go-cfclient"
 	"github.com/jszwec/csvutil"
 	"github.com/xenolf/lego/log"
@@ -12,16 +12,15 @@ import (
 
 var (
 	apiEndpoint = kingpin.Flag("api-endpoint", "API endpoint").Default("").Envar("API_ENDPOINT").String()
-	apiToken = kingpin.Flag("api-token", "CF OAuth API token").Default("").Envar("API_TOKEN").String()
-	critical = kingpin.Flag("critical", "Print the contact list for a critical message").Default("false").Envar("CRITICAL").Bool()
+	apiToken    = kingpin.Flag("api-token", "CF OAuth API token").Default("").Envar("API_TOKEN").String()
+	critical    = kingpin.Flag("critical", "Print the contact list for a critical message").Default("false").Envar("CRITICAL").Bool()
 )
 
 type Csv struct {
 	Email string `csv:"email"`
 }
 
-
-func main(){
+func main() {
 	kingpin.Parse()
 
 	if !apiTokenPresent(apiToken) {
@@ -48,7 +47,7 @@ func main(){
 	addresses := emails.FetchEmails(client, *critical)
 
 	for _, usr := range addresses {
-		record := Csv{ Email: usr}
+		record := Csv{Email: usr}
 		data = append(data, record)
 	}
 
@@ -60,7 +59,7 @@ func main(){
 }
 
 func apiEndpointPresent(apiEndpoint *string) bool {
-	if apiEndpoint == nil ||*apiEndpoint == "" {
+	if apiEndpoint == nil || *apiEndpoint == "" {
 		return false
 	}
 

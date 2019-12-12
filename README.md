@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.com/alphagov/paas-cf.svg?branch=master)](https://travis-ci.com/alphagov/paas-cf)
+[![Build Status](https://travis-ci.com/alphagov/paas.svg?branch=master)](https://travis-ci.com/alphagov/paas)
 
-# paas-cf
+# paas
 
 This repository contains [Concourse][] pipelines and related [Terraform][]
 and [BOSH][] manifests that allow provisioning of [CloudFoundry][] on AWS.
@@ -87,7 +87,7 @@ To interact with a CloudFoundry environment you will need the following:
 
 To login, you should prefer using your Google account, by logging in using `cf login --sso` as [documented here](https://docs.cloud.service.gov.uk/get_started.html#use-single-sign-on)
 
-Alternatively, you can use `cf login` as [documented here](http://docs.cloudfoundry.org/cf-cli/getting-started.html#login), 
+Alternatively, you can use `cf login` as [documented here](http://docs.cloudfoundry.org/cf-cli/getting-started.html#login),
 to log in as the `admin` user, using the CF admin password from `make dev credhub`.
 
 ## Running tests locally
@@ -180,8 +180,8 @@ the `JOB` variable. You also have to specify your environment type, e.g.
 `JOB=performance-tests make dev run_job`.
 
 This will not only tigger the job, but before that it will modify the pipeline
-to remove `passed` dependencies for `paas-cf` in the specified job. This means
-that your job will pick the latest changes to `paas-cf` directly, without the
+to remove `passed` dependencies for `paas` in the specified job. This means
+that your job will pick the latest changes to `paas` directly, without the
 need to run the pipeline from start in order to bring the changes forward.
 
 ## Concourse credentials
@@ -234,7 +234,7 @@ providing them to the interactive configure command.
 
 
 ## Pingdom checks
-Visit [Pingdom documentation page](https://github.com/alphagov/paas-cf/blob/master/doc/pingdom.md)
+Visit [Pingdom documentation page](https://github.com/alphagov/paas/blob/master/doc/pingdom.md)
 
 ## Other useful commands
 Type `make` to get the list of all available commands.

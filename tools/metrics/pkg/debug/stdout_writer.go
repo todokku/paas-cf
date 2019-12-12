@@ -3,7 +3,7 @@ package debug
 import (
 	"fmt"
 
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 // StdOutWriter writes the received metrics to the stdout

@@ -5,8 +5,8 @@ import (
 
 	"code.cloudfoundry.org/lager"
 
-	"github.com/alphagov/paas-cf/tools/metrics/pkg/billing"
-	m "github.com/alphagov/paas-cf/tools/metrics/pkg/metrics"
+	"github.com/alphagov/paas/tools/metrics/pkg/billing"
+	m "github.com/alphagov/paas/tools/metrics/pkg/metrics"
 )
 
 func BillingCostsGauge(
