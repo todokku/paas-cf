@@ -16,13 +16,16 @@ chmod +x "${WORKING_DIR}"/terraform-provider-pingdom
 
 cd "${WORKING_DIR}"
 
-for dir in "${PAAS_DIR}"/terraform/*/ ; do
-  [[ ${dir} == *"terraform/providers"* ]] && continue
-  [[ ${dir} == *"terraform/scripts"* ]] && continue
-  [[ ${dir} == *"terraform/spec"* ]] && continue
+for dir in "${PAAS_DIR}"/terraform/cf/*/ ; do
+  [[ ${dir} == *"terraform/cf/providers"* ]] && continue
+  [[ ${dir} == *"terraform/cf/scripts"* ]] && continue
+  [[ ${dir} == *"terraform/cf/spec"* ]] && continue
 
   terraform init -backend=false "${dir}" >/dev/null
   terraform validate -check-variables=false "${dir}"
 done
+
+terraform init -backend=false "${PAAS_DIR}/terraform/build" >/dev/null
+terraform validate -check-variables=false "${PAAS_DIR}/terraform/build"
 
 terraform fmt -check -diff "${PAAS_DIR}/terraform"

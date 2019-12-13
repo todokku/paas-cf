@@ -4,6 +4,8 @@
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+# START OF MAKE TARGETS BROUGHT IN FROM paas-cf
+
 DEPLOY_ENV_MAX_LENGTH=8
 DEPLOY_ENV_VALID_LENGTH=$(shell if [ $$(printf "%s" $(DEPLOY_ENV) | wc -c) -gt $(DEPLOY_ENV_MAX_LENGTH) ]; then echo ""; else echo "OK"; fi)
 DEPLOY_ENV_VALID_CHARS=$(shell if echo $(DEPLOY_ENV) | grep -q '^[a-zA-Z0-9-]*$$'; then echo "OK"; else echo ""; fi)
@@ -89,13 +91,13 @@ lint_yaml:
 lint_terraform: dev ## Lint the terraform files.
 	$(eval export TF_VAR_system_dns_zone_name=$SYSTEM_DNS_ZONE_NAME)
 	$(eval export TF_VAR_apps_dns_zone_name=$APPS_DNS_ZONE_NAME)
-	@terraform/scripts/lint.sh
+	@terraform/lint.sh
 
 lint_shellcheck:
 	find . -name '*.sh' -not -path './.git/*' -not -path '*/vendor/*' -not -path './platform-tests/pkg/*'  -not -path './manifests/cf-deployment/*' -not -path './manifests/prometheus/upstream/*' | xargs shellcheck
 
 lint_concourse:
-	cd .. && SHELLCHECK_OPTS="-e SC1091" python paas/concourse/scripts/pipecleaner.py --fatal-warnings paas/concourse/pipelines/*.yml
+	cd .. && SHELLCHECK_OPTS="-e SC1091" python paas/concourse/scripts/pipecleaner.py --fatal-warnings paas/concourse/pipelines/**.yml
 
 .PHONY: lint_ruby
 lint_ruby:
@@ -136,89 +138,24 @@ list_merge_keys: ## List all GPG keys allowed to sign merge commits.
 update_merge_keys:
 	ruby concourse/scripts/generate-public-key-vars.rb
 
-.PHONY: dev
-dev: ## Set Environment to DEV
-	$(eval export AWS_DEFAULT_REGION ?= eu-west-1)
-	$(eval export AWS_ACCOUNT=dev)
-	$(eval export MAKEFILE_ENV_TARGET=dev)
-	$(eval export PERSISTENT_ENVIRONMENT=false)
-	$(eval export ENABLE_DESTROY=true)
-	$(eval export ENABLE_AUTODELETE=true)
-	$(eval export SYSTEM_DNS_ZONE_NAME=${DEPLOY_ENV}.dev.cloudpipeline.digital)
-	$(eval export APPS_DNS_ZONE_NAME=${DEPLOY_ENV}.dev.cloudpipelineapps.digital)
-	$(eval export ALERT_EMAIL_ADDRESS?=govpaas-alerting-dev@digital.cabinet-office.gov.uk)
-	$(eval export NEW_ACCOUNT_EMAIL_ADDRESS?=the-multi-cloud-paas-team+dev@digital.cabinet-office.gov.uk)
-	$(eval export ENABLE_ALERT_NOTIFICATIONS ?= false)
-	$(eval export SKIP_COMMIT_VERIFICATION=true)
-	$(eval export ENV_SPECIFIC_BOSH_VARS_FILE=default.yml)
-	$(eval export DISABLE_HEALTHCHECK_DB=true)
-	$(eval export CONCOURSE_AUTH_DURATION=48h)
-	$(eval export DISABLE_PIPELINE_LOCKING=true)
-	$(eval export TEST_HEAVY_LOAD=true)
-	$(eval export PAAS_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
-	$(eval export PAAS_HIGH_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
-	$(eval export ENABLE_MORNING_DEPLOYMENT=true)
-	$(eval export SLIM_DEV_DEPLOYMENT ?= true)
+.PHONY: dev-cf
+dev-cf: ## Set Environment to DEV
+	$(foreach definition,$(shell config/print_env_vars_for_environment.rb cf any-dev-env true),$(eval export $(definition)))
 	@true
 
-.PHONY: stg-lon
-stg-lon: ## Set Environment to stg-lon
-	$(eval export AWS_ACCOUNT=staging)
-	$(eval export MAKEFILE_ENV_TARGET=stg-lon)
-	$(eval export PERSISTENT_ENVIRONMENT=true)
-	$(eval export ENABLE_AUTO_DEPLOY=true)
-	$(eval export OUTPUT_TAG_PREFIX=prod-)
-	$(eval export SYSTEM_DNS_ZONE_NAME=london.staging.cloudpipeline.digital)
-	$(eval export APPS_DNS_ZONE_NAME=london.staging.cloudpipelineapps.digital)
-	$(eval export ALERT_EMAIL_ADDRESS=the-multi-cloud-paas-team+stg-lon@digital.cabinet-office.gov.uk)
-	$(eval export NEW_ACCOUNT_EMAIL_ADDRESS=${ALERT_EMAIL_ADDRESS})
-	$(eval export ENV_SPECIFIC_BOSH_VARS_FILE=stg-lon.yml)
-	$(eval export DEPLOY_ENV=stg-lon)
-	$(eval export TEST_HEAVY_LOAD=true)
-	$(eval export PAAS_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
-	$(eval export PAAS_HIGH_PASSWORD_STORE_DIR?=${HOME}/.paas-pass-high)
-	$(eval export AWS_DEFAULT_REGION=eu-west-2)
-	$(eval export AWS_REGION=eu-west-2)
+.PHONY: stg-lon-cf
+stg-lon-cf: ## Set Environment to stg-lon
+	$(foreach definition,$(shell config/print_env_vars_for_environment.rb cf stg-lon true),$(eval export $(definition)))
 	@true
 
-.PHONY: prod
-prod: ## Set Environment to Production
-	$(eval export AWS_ACCOUNT=prod)
-	$(eval export MAKEFILE_ENV_TARGET=prod)
-	$(eval export PERSISTENT_ENVIRONMENT=true)
-	$(eval export ENABLE_AUTO_DEPLOY=true)
-	$(eval export INPUT_TAG_PREFIX=prod-)
-	$(eval export SYSTEM_DNS_ZONE_NAME=cloud.service.gov.uk)
-	$(eval export APPS_DNS_ZONE_NAME=cloudapps.digital)
-	$(eval export ALERT_EMAIL_ADDRESS=the-multi-cloud-paas-team+prod@digital.cabinet-office.gov.uk)
-	$(eval export NEW_ACCOUNT_EMAIL_ADDRESS=${ALERT_EMAIL_ADDRESS})
-	$(eval export ENV_SPECIFIC_BOSH_VARS_FILE=prod.yml)
-	$(eval export DISABLE_CF_ACCEPTANCE_TESTS=true)
-	$(eval export DEPLOY_ENV=prod)
-	$(eval export PAAS_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
-	$(eval export PAAS_HIGH_PASSWORD_STORE_DIR?=${HOME}/.paas-pass-high)
-	$(eval export AWS_DEFAULT_REGION=eu-west-1)
-	$(eval export AWS_REGION=eu-west-1)
+.PHONY: prod-cf
+prod-cf: ## Set Environment to Production
+	$(foreach definition,$(shell config/print_env_vars_for_environment.rb cf prod true),$(eval export $(definition)))
 	@true
 
-.PHONY: prod-lon
-prod-lon: ## Set Environment to prod-lon
-	$(eval export AWS_ACCOUNT=prod)
-	$(eval export MAKEFILE_ENV_TARGET=prod-lon)
-	$(eval export PERSISTENT_ENVIRONMENT=true)
-	$(eval export ENABLE_AUTO_DEPLOY=true)
-	$(eval export INPUT_TAG_PREFIX=prod-)
-	$(eval export SYSTEM_DNS_ZONE_NAME=london.cloud.service.gov.uk)
-	$(eval export APPS_DNS_ZONE_NAME=london.cloudapps.digital)
-	$(eval export ALERT_EMAIL_ADDRESS=the-multi-cloud-paas-team+prod-lon@digital.cabinet-office.gov.uk)
-	$(eval export NEW_ACCOUNT_EMAIL_ADDRESS=${ALERT_EMAIL_ADDRESS})
-	$(eval export ENV_SPECIFIC_BOSH_VARS_FILE=prod-lon.yml)
-	$(eval export DISABLE_CF_ACCEPTANCE_TESTS=true)
-	$(eval export DEPLOY_ENV=prod-lon)
-	$(eval export PAAS_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
-	$(eval export PAAS_HIGH_PASSWORD_STORE_DIR?=${HOME}/.paas-pass-high)
-	$(eval export AWS_DEFAULT_REGION=eu-west-2)
-	$(eval export AWS_REGION=eu-west-2)
+.PHONY: prod-lon-cf
+prod-lon-cf: ## Set Environment to prod-lon
+	$(foreach definition,$(shell config/print_env_vars_for_environment.rb cf prod-lon true),$(eval export $(definition)))
 	@true
 
 .PHONY: bosh-cli
@@ -229,8 +166,8 @@ bosh-cli:
 ssh_bosh: ## SSH to the bosh server
 	@echo "ssh_bosh has moved to paas-bootstrap 🐝"
 
-.PHONY: pipelines
-pipelines: check-env ## Upload pipelines to Concourse
+.PHONY: cf-pipelines
+cf-pipelines: check-env ## Upload pipelines to Concourse
 	concourse/scripts/pipelines-cloudfoundry.sh
 
 # This target matches any "monitor-" prefix; the "$(*)" magic variable
@@ -260,8 +197,8 @@ showenv: ## Display environment information
 	$(if ${MAKEFILE_ENV_TARGET},,$(error Must set MAKEFILE_ENV_TARGET))
 	@scripts/showenv.sh
 
-.PHONY: upload-all-secrets
-upload-all-secrets: upload-google-oauth-secrets upload-microsoft-oauth-secrets upload-splunk-secrets upload-notify-secrets upload-aiven-secrets upload-logit-secrets upload-pagerduty-secrets
+.PHONY: cf-upload-all-secrets
+cf-upload-all-secrets: upload-google-oauth-secrets upload-microsoft-oauth-secrets upload-splunk-secrets upload-notify-secrets upload-aiven-secrets upload-logit-secrets upload-pagerduty-secrets
 
 .PHONY: upload-google-oauth-secrets
 upload-google-oauth-secrets: check-env ## Decrypt and upload Google Admin Console credentials to Credhub
@@ -359,3 +296,88 @@ credhub:
 	$(if ${MAKEFILE_ENV_TARGET},,$(error Must set MAKEFILE_ENV_TARGET))
 	$(if ${DEPLOY_ENV},,$(error Must pass DEPLOY_ENV=<name>))
 	@scripts/credhub_shell.sh
+
+# START OF MAKE TARGETS BROUGHT IN FROM paas-release-ci
+
+check-deploy-env-var:
+	$(if ${DEPLOY_ENV},,$(error Must pass DEPLOY_ENV=<name>))
+
+PASSWORD_STORE_DIR?=${HOME}/.paas-pass
+CF_DEPLOY_ENV?=${DEPLOY_ENV}
+
+build-globals:
+	$(eval export PASSWORD_STORE_DIR=${PASSWORD_STORE_DIR})
+	$(eval export CF_DEPLOY_ENV=${CF_DEPLOY_ENV})
+	@true
+
+.PHONY: dev-build
+dev-build: build-globals check-deploy-env-var ## Work on the dev account
+	$(foreach definition,$(shell config/print_env_vars_for_environment.rb build any-dev-env true),$(eval export $(definition)))
+	@true
+
+.PHONY: ci-build
+ci-build: build-globals ## Work on the ci account
+	$(foreach definition,$(shell config/print_env_vars_for_environment.rb build ci true),$(eval export $(definition)))
+	@true
+
+.PHONY: build-upload-all-secrets
+build-upload-all-secrets: upload-cf-cli-secrets upload-zendesk-secrets upload-rubbernecker-secrets upload-hackmd-secrets
+
+.PHONY: upload-cf-cli-secrets
+upload-cf-cli-secrets: check-env-vars ## Decrypt and upload CF CLI credentials to S3
+	$(eval export CF_CLI_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
+	$(if ${AWS_ACCOUNT},,$(error Must set environment to dev/ci))
+	$(if ${CF_CLI_PASSWORD_STORE_DIR},,$(error Must pass CF_CLI_PASSWORD_STORE_DIR=<path_to_password_store>))
+	$(if $(wildcard ${CF_CLI_PASSWORD_STORE_DIR}),,$(error Password store ${CF_CLI_PASSWORD_STORE_DIR} does not exist))
+	@scripts/upload-cf-cli-secrets.sh
+
+.PHONY: upload-zendesk-secrets
+upload-zendesk-secrets: check-env-vars ## Decrypt and upload Zendesk credentials to S3
+	$(eval export ZENDESK_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
+	$(if ${ZENDESK_PASSWORD_STORE_DIR},,$(error Must pass ZENDESK_PASSWORD_STORE_DIR=<path_to_password_store>))
+	$(if $(wildcard ${ZENDESK_PASSWORD_STORE_DIR}),,$(error Password store ${ZENDESK_PASSWORD_STORE_DIR} does not exist))
+	@scripts/upload-zendesk-secrets.sh
+
+.PHONY: upload-rubbernecker-secrets
+upload-rubbernecker-secrets: check-env-vars ## Decrypt and upload Rubbernecker credentials to S3
+	$(eval export RUBBERNECKER_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
+	$(if ${RUBBERNECKER_PASSWORD_STORE_DIR},,$(error Must pass RUBBERNECKER_PASSWORD_STORE_DIR=<path_to_password_store>))
+	$(if $(wildcard ${RUBBERNECKER_PASSWORD_STORE_DIR}),,$(error Password store ${RUBBERNECKER_PASSWORD_STORE_DIR} does not exist))
+	@scripts/upload-rubbernecker-secrets.sh
+
+.PHONY: upload-hackmd-secrets
+upload-hackmd-secrets: check-env-vars ## Decrypt and upload Hackmd credentials to S3
+	$(eval export HACKMD_PASSWORD_STORE_DIR?=${HOME}/.paas-pass)
+	$(if ${HACKMD_PASSWORD_STORE_DIR},,$(error Must pass HACKMD_PASSWORD_STORE_DIR=<path_to_password_store>))
+	$(if $(wildcard ${HACKMD_PASSWORD_STORE_DIR}),,$(error Password store ${HACKMD_PASSWORD_STORE_DIR} does not exist))
+	@scripts/upload-hackmd-secrets.sh
+
+.PHONY: build-pipelines
+build-pipelines: ## Upload setup pipelines to concourse
+	@scripts/deploy-setup-pipelines.sh
+
+.PHONY: build-boshrelease-pipelines
+build-boshrelease-pipelines: ## Upload boshrelease pipelines to concourse
+	@scripts/build-boshrelease-pipelines.sh
+
+.PHONY: build-integration-test-pipelines
+build-integration-test-pipelines: ## Upload integration test pipelines to concourse
+	@scripts/integration-test-pipelines.sh
+
+.PHONY: build-plain-pipelines
+build-plain-pipelines: ## Upload plain pipelines to concourse
+	@scripts/plain-pipelines.sh
+
+.PHONY: build-showenv
+build-showenv: ## Display environment information
+	@scripts/environment.sh
+
+## Testing tasks
+
+.PHONY: build-pause-all-pipelines
+build-pause-all-pipelines: ## Pause all pipelines so that create-bosh-concourse can be run safely.
+	./scripts/pause-pipelines.sh pause
+
+.PHONY: build-unpause-all-pipelines
+build-unpause-all-pipelines: ## Unpause all pipelines after running create-bosh-concourse
+	./scripts/pause-pipelines.sh unpause

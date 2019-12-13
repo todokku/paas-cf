@@ -66,6 +66,8 @@ before_install:
   - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/alphagov/paas/
   - export TRAVIS_BUILD_DIR=$HOME/gopath/src/github.com/alphagov/paas
   - cd $HOME/gopath/src/github.com/alphagov/paas
+  - go get github.com/onsi/ginkgo/ginkgo
+  - go get github.com/onsi/gomega/...
 
 script:
   - make test
