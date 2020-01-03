@@ -146,3 +146,8 @@ func (h *HttpHandlers) NoRoute(c context.ContextInterface) error {
 		Err:        ErrNotFound(c.Request().URL.Path),
 	}
 }
+
+func (h *HttpHandlers) Example(c context.ContextInterface) error {
+	c.HTML(http.StatusOK, "example", nil)
+	return nil
+}

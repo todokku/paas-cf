@@ -88,6 +88,7 @@ func configureGinRouter(httpHandlers handlers.HttpHandlers) *gin.Engine {
 	ginRouter.StaticFS("/stylesheets/", http.Dir("./stylesheets"))
 
 	ginRouter.GET("/services/:service", handlers.GinWrap(httpHandlers.GetService))
+	ginRouter.GET("/example", handlers.GinWrap(httpHandlers.Example))
 	ginRouter.GET("/", handlers.GinWrap(httpHandlers.Index))
 
 	ginRouter.NoRoute(handlers.GinWrap(httpHandlers.NoRoute))

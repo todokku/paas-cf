@@ -1,0 +1,112 @@
+{{/* . is an instance of viewmodels.Service */}}
+
+{{define "page-title"}}postgres - GOV.UK PaaS Service Marketplace{{end}}
+{{define "page-heading"}}GOV.UK PaaS Service Marketplace{{end}}
+
+{{define "main-content"}}
+    <span class="govuk-caption-l">Service</span>
+    <h2 class="govuk-heading-l">postgres</h2>
+    <p class="govuk-body">AWS RDS PostgreSQL service</p>
+
+    <h3 class="govuk-heading-l">Service Plans</h3>
+    <table class="govuk-table">
+        <caption class="govuk-table__caption">Service plans offered for the postgres service</caption>
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th class="govuk-table__header">Name</th>
+                <th class="govuk-table__header">Free?</th>
+                <th class="govuk-table__header">Disk</th>
+                <th class="govuk-table__header">RAM</th>
+                <th class="govuk-table__header">CPU Cores</th>
+                <th class="govuk-table__header"></th>
+            </tr>
+        </thead>
+
+        <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">small-5.7</td>
+            <td class="govuk-table__cell">Yes</td>
+            <td class="govuk-table__cell">20gb</td>
+            <td class="govuk-table__cell">4gb</td>
+            <td class="govuk-table__cell">1</td>
+            <td class="govuk-table__cell"><a href="#">View in cost calculator</a></td>
+        </tr>
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">small-ha-5.7</td>
+            <td class="govuk-table__cell">No</td>
+            <td class="govuk-table__cell">20gb</td>
+            <td class="govuk-table__cell">4gb</td>
+            <td class="govuk-table__cell">1</td>
+            <td class="govuk-table__cell"><a href="#">View in cost calculator</a></td>
+        </tr>
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">medium-5.7</td>
+            <td class="govuk-table__cell">No</td>
+            <td class="govuk-table__cell">100gb</td>
+            <td class="govuk-table__cell">8gb</td>
+            <td class="govuk-table__cell">2</td>
+            <td class="govuk-table__cell"><a href="#">View in cost calculator</a></td>
+        </tr>
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">medium-ha-5.7</td>
+            <td class="govuk-table__cell">No</td>
+            <td class="govuk-table__cell">100gb</td>
+            <td class="govuk-table__cell">8gb</td>
+            <td class="govuk-table__cell">2</td>
+            <td class="govuk-table__cell"><a href="#">View in cost calculator</a></td>
+        </tr>
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">large-5.7</td>
+            <td class="govuk-table__cell">No</td>
+            <td class="govuk-table__cell">512gb</td>
+            <td class="govuk-table__cell">32gb</td>
+            <td class="govuk-table__cell">4</td>
+            <td class="govuk-table__cell"><a href="#">View in cost calculator</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h3 class="govuk-heading-l">Service options</h3>
+    <table class="govuk-table">
+        <caption class="govuk-table__caption">Configuration options available for postgres service plans</caption>
+
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th class="govuk-table__header">Name</th>
+                <th class="govuk-table__header">Create</th>
+                <th class="govuk-table__header">Update</th>
+                <th class="govuk-table__header">Description</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">DO_STUFF</td>
+                <td class="govuk-table__cell">Yes</td>
+                <td class="govuk-table__cell">No</td>
+                <td class="govuk-table__cell">Whether the service should bother doing stuff</td>
+            </tr>
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">STOP_STUFF</td>
+                <td class="govuk-table__cell">No</td>
+                <td class="govuk-table__cell">Yes</td>
+                <td class="govuk-table__cell">Whether the service should stop doing stuff</td>
+            </tr>
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">ACTIVE</td>
+                <td class="govuk-table__cell">Yes</td>
+                <td class="govuk-table__cell">Yes</td>
+                <td class="govuk-table__cell">Whether the service is active</td>
+            </tr>
+        </tbody>
+    </table>
+{{end}}
+
+{{define "side-content"}}
+    <h3 class="govuk-heading-m">Create a postgres service instance</h3>
+    <p class="govuk-body">
+        <pre>
+            cf create-service postgres PLAN MY_SERVICE
+        </pre>
+    </p>
+{{end}}
