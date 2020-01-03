@@ -89,12 +89,38 @@
       db_instance_class: "db.m4.4xlarge"
       allocated_storage: 2048
 
+    tiny_plan_resources: &tiny_plan_resources
+      cpu_cores: 1
+      disk: 5gb
+      ram: 1gb
+    small_plan_resources: &small_plan_resources
+      cpu_cores: 1
+      disk: 20gb
+      ram: 2gb
+    medium_plan_resources: &medium_plan_resources
+      cpu_cores: 2
+      disk: 100gb
+      ram: 8gb
+    large_plan_resources: &large_plan_resources
+      cpu_cores: 8
+      disk: 512gb
+      ram: 32gb
+    xlarge_plan_resources: &xlarge_plan_resources
+      cpu_cores: 16
+      disk: 2049gb
+      ram: 64gb
+
+
 - type: replace
   path: /instance_groups/name=rds_broker/jobs/name=rds-broker/properties/rds-broker/catalog?/services?/-
   value:
     id: "ce71b484-d542-40f7-9dd4-5526e38c81ba"
     name: "postgres"
-    description: "AWS RDS PostgreSQL service"
+    description: >
+      PostgreSQL database service hosted by AWS Relational Database Service.
+
+      Plan names indicate the version of Postgres (e.g. small-10), and whether the database is in a highly available
+      configuration (e.g. small-ha-10).
     bindable: true
     tags:
       - "postgres"
@@ -119,6 +145,8 @@
       bullets:
         - "Dedicated Postgres 9.5 server"
         - "AWS RDS"
+      compute_resources:
+        <<: *tiny_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *tiny_plan_rds_properties # yamllint disable-line
@@ -139,6 +167,8 @@
         - "Dedicated Postgres 9.5 server"
         - "Storage Encrypted"
         - "AWS RDS"
+      compute_resources:
+        <<: *small_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *small_plan_rds_properties # yamllint disable-line
@@ -159,6 +189,8 @@
       bullets:
         - "Dedicated Postgres 9.5 server"
         - "AWS RDS"
+      compute_resources:
+        <<: *small_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *small_plan_rds_properties # yamllint disable-line
@@ -181,6 +213,8 @@
         - "Dedicated Postgres 9.5 server"
         - "Storage Encrypted"
         - "AWS RDS"
+      compute_resources:
+        <<: *medium_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *medium_plan_rds_properties # yamllint disable-line
@@ -202,6 +236,8 @@
         - "Dedicated Postgres 9.5 server"
         - "Storage Encrypted"
         - "AWS RDS"
+      compute_resources:
+        <<: *medium_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *medium_plan_rds_properties # yamllint disable-line
@@ -224,6 +260,8 @@
         - "Dedicated Postgres 9.5 server"
         - "Storage Encrypted"
         - "AWS RDS"
+      compute_resources:
+        <<: *large_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *large_plan_rds_properties # yamllint disable-line
@@ -245,6 +283,8 @@
         - "Dedicated Postgres 9.5 server"
         - "Storage Encrypted"
         - "AWS RDS"
+      compute_resources:
+        <<: *large_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *large_plan_rds_properties # yamllint disable-line
@@ -267,6 +307,8 @@
         - "Dedicated Postgres 9.5 server"
         - "Storage Encrypted"
         - "AWS RDS"
+      compute_resources:
+        <<: *xlarge_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *xlarge_plan_rds_properties # yamllint disable-line
@@ -288,6 +330,8 @@
         - "Dedicated Postgres 9.5 server"
         - "Storage Encrypted"
         - "AWS RDS"
+      compute_resources:
+        <<: *xlarge_plan_resources # yamllint disable-line
     rds_properties:
       <<: *default_postgres_rds_properties # yamllint disable-line
       <<: *xlarge_plan_rds_properties # yamllint disable-line
