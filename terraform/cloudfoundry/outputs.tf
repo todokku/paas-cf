@@ -54,6 +54,10 @@ output "cf_db_address" {
   value = "${aws_db_instance.cf.address}"
 }
 
+output "cf_app_autoscaler_address" {
+  value = "${aws_db_instance.cf_app_autoscaler.address}"
+}
+
 output "cdn_db_connection_string" {
   sensitive = true
   value     = "${format("postgresql://%v:%v@%v/%v", aws_db_instance.cdn.username, var.secrets_cdn_db_master_password, aws_db_instance.cdn.address, aws_db_instance.cdn.name)}"

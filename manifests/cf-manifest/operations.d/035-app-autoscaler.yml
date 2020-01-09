@@ -1,0 +1,151 @@
+---
+- type: replace
+  path: /releases/-
+  value:
+    name: app-autoscaler
+    version: "3.0.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry-incubator/app-autoscaler-release?v=3.0.0"
+    sha1: "eb532308d63a8a3db6645c118b3429d0ab2d5937"
+
+- type: remove
+  path: /instance_groups/name=postgres_autoscaler
+
+# asactors/scalingengine
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db
+  value: &cf_app_autoscaler_database
+    databases:
+      - name: app_autoscaler
+        tag: autoscaler
+    address: ((terraform_outputs_cf_app_autoscaler_address))
+    db_scheme: postgres
+    port: 5432
+    roles:
+      - name: admin
+        password: ((external_app_autoscaler_database_password))
+        tag: autoscaler
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db_connection_config
+  value: &databaseConnectionConfig
+    max_open_connections: 100
+    max_idle_connections: 10
+    connection_max_lifetime: 60s
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# asactors/scheduler
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/policy_db
+  value: *cf_app_autoscaler_database
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler_db
+  value: *cf_app_autoscaler_database
+
+#asactors/operator
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db_connection_config
+  value: *databaseConnectionConfig
+
+# asmetrics/metricsserver
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# asmetrics/eventgenerator
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# asnozzle/metricsgateway
+- type: replace
+  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# asapi/golangapiserver
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/policy_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/binding_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/binding_db_connection_config
+  value: *databaseConnectionConfig
+# asapi/metricsforwarder
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db
+  value: *cf_app_autoscaler_database
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
