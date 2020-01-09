@@ -94,6 +94,7 @@ resource "aws_db_instance" "cf_app_autoscaler" {
     deploy_env = "${var.env}"
   }
 }
+
 resource "aws_security_group" "cf_rds_client" {
   name        = "${var.env}-cf-rds-client"
   description = "Security group of the CF RDS clients"
