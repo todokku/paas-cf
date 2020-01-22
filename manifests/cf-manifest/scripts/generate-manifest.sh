@@ -17,7 +17,6 @@ if [ "${SLIM_DEV_DEPLOYMENT-}" = "true" ]; then
   opsfile_args="$opsfile_args -o ${CF_MANIFEST_DIR}/operations/scale-down-dev.yml"
   opsfile_args="$opsfile_args -o ${CF_MANIFEST_DIR}/operations/change-vm-types-dev.yml"
   opsfile_args="$opsfile_args -o ${CF_MANIFEST_DIR}/operations/speed-up-deployment-dev.yml"
-  opsfile_args="$opsfile_args -o ${CF_MANIFEST_DIR}/operations/tlwr.yml"
 fi
 
 # shellcheck disable=SC2086
