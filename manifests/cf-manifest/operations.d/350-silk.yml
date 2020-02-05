@@ -1,0 +1,8 @@
+---
+- type: replace
+  path: /releases/name=silk
+  value:
+    name: silk
+    version: 0.0.1581344270
+    url: https://s3-eu-west-1.amazonaws.com/gds-paas-build-releases/silk-0.0.1581344270.tgz
+    sha1: 828235d54ddde27673080e31b2a5feb3de536fb2
