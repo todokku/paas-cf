@@ -110,3 +110,63 @@
       extended_key_usage:
         - client_auth
         - server_auth
+
+- type: replace
+  path: /meta?/rds_broker
+  value:
+    default_mssql_rds_properties: &default_mssql_rds_properties
+      storage_type: "gp2"
+      auto_minor_version_upgrade: true
+      multi_az: false
+      storage_encrypted: false
+      publicly_accessible: false
+      copy_tags_to_snapshot: true
+      skip_final_snapshot: false
+      backup_retention_period: 7
+      db_subnet_group_name: ((terraform_outputs_rds_broker_dbs_subnet_group))
+      vpc_security_group_ids:
+        - ((terraform_outputs_rds_broker_dbs_security_group_id))
+      engine: sqlserver-se
+      engine_version: "14.00.3223.3.v1"
+      engine_family: sqlserver-se-14.0
+      license_model: license-included
+
+    large_plan_rds_properties: &large_plan_rds_properties
+      db_instance_class: "db.m4.large"
+      allocated_storage: 20
+      backup_retention_period: 0
+      skip_final_snapshot: true
+
+- type: replace
+  path: /instance_groups/name=rds_broker/jobs/name=rds-broker/properties/rds-broker/catalog?/services?/-
+  value:
+    id: f4deaddf-3936-4e18-8716-4fdd6a9faec0
+    name: mssql
+    description: "AWS RDS MSSQL service"
+    bindable: true
+    tags:
+      - mssql
+      - relational
+    metadata:
+      displayName: "AWS RDS MSSQL"
+      imageUrl: ""
+      longDescription: "AWS RDS mssql service"
+      providerDisplayName: "Amazon Web Services"
+      documentationUrl: "https://aws.amazon.com/documentation/rds/"
+      supportUrl: "¯\_(ツ)_/¯"
+    plan_updateable: true
+
+- type: replace
+  path: /instance_groups/name=rds_broker/jobs/name=rds-broker/properties/rds-broker/catalog/services/name=mssql/plans?/-
+  value:
+    id: 47eb5baa-3818-4edc-98bd-e1c4f5941f5a
+    name: large-14
+    description: "20GB Storage, NOT BACKED UP, Dedicated Instance. MSSQL Version 14 2017. DB Instance Class: db.m4.large."
+    free: true
+    metadata:
+      bullets:
+        - "Dedicated MSSQL 2017 server"
+        - "AWS RDS"
+    rds_properties:
+      <<: *default_mssql_rds_properties # yamllint disable-line
+      <<: *large_plan_rds_properties # yamllint disable-line

@@ -2214,6 +2214,10 @@ jobs:
                 xlarge-8.0-high-iops
                 EOF
 
+                cat <<EOF | xargs -n1 cf enable-service-access mssql -b rds-broker -p
+                large-14
+                EOF
+
                 cat <<EOF | xargs -n1 cf enable-service-access postgres -b rds-broker -p
                 tiny-unencrypted-9.5
                 small-ha-9.5
