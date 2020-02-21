@@ -35,6 +35,7 @@ manifest_without_isolation_segments="$(
     ${opsfile_args} \
     --ops-file="${WORKDIR}/vpc-peering-opsfile/vpc-peers.yml" \
     --ops-file="${WORKDIR}/tenant-uaa-clients-opsfile/tenant-uaa-opsfile.yml" \
+    --ops-file="${CF_DEPLOYMENT_DIR}/operations/experimental/add-syslog-agent.yml" \
     "${CF_DEPLOYMENT_DIR}/cf-deployment.yml"
 )"
 
