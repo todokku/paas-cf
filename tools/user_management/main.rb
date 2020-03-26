@@ -29,7 +29,7 @@ cf_admin_users = raw_users
 
 cf_auditor_users = raw_users
   .reject { |ru| ru['origin'] == 'admin-google' }
-  .map { |ru| ru.update('username' => ru['google_id']) }
+  .map { |ru| ru.update('username' => ru['email']) }
   .map { |ru| User.new(ru) }
   .select { |user| user.has_role_for_env?(ENV_TARGET, 'cf-auditor') }
 
