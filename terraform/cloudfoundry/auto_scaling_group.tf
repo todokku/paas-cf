@@ -27,3 +27,8 @@ resource "aws_autoscaling_group" "routers_asg" {
     propagate_at_launch = false
   }
 }
+
+resource "aws_autoscaling_attachment" "asg_attached_to_router_target_group" {
+  autoscaling_group_name  = "${aws_autoscaling_group.routers_asg.id}"
+  alb_target_group_arn    = "${aws_lb_target_group.cf_router_app_domain_https.arn}"
+}
