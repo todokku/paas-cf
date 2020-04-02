@@ -1640,6 +1640,80 @@ jobs:
 
                 bosh -n deploy cf-manifest/cf-manifest.yml
 
+      - task: attach-routers-to-auto-scaling-group
+        tags: [colocated-with-web]
+        config:
+          platform: linux
+          image_resource: *gov-paas-bosh-cli-v2-image-resource
+          inputs:
+            - name: paas-cf
+            - name: cf-manifest
+            - name: cf-tfstate
+          params:
+            BOSH_ENVIRONMENT: ((bosh_fqdn))
+            BOSH_CA_CERT: ((bosh-ca-cert))
+            BOSH_DEPLOYMENT: ((deploy_env))
+            BOSH_CLIENT_SECRET: ((bosh-client-secret))
+            AWS_DEFAULT_REGION: ((aws_region))
+          run:
+            path: sh
+            args:
+              - -e
+              - -c
+              - |
+                BOSH_CLIENT='admin'
+                export BOSH_CLIENT
+
+                VAL_FROM_YAML=$(pwd)/paas-cf/concourse/scripts/val_from_yaml.rb
+
+                ./paas-cf/concourse/scripts/extract_terraform_state_to_yaml.rb \
+                < cf-tfstate/cf.tfstate \
+                > cf-terraform-outputs.yml
+
+                ASG_NAME=$($VAL_FROM_YAML terraform_outputs_routers_asg_name cf-terraform-outputs.yml)
+
+                # Get the desired instances from bosh
+                bosh vms --json \
+                  | jq -r '.Tables[0].Rows[] | select(.instance|startswith("router")) | select(.active == "true") | .vm_cid' \
+                  | sort \
+                > bosh-instances.txt
+
+                # Get the current instances from the ASG
+                echo "some" > asg-instances.txt
+                aws autoscaling describe-auto-scaling-groups \
+                    --auto-scaling-group-names "${ASG_NAME}" \
+                  | jq -r '.AutoScalingGroups[].Instances[].InstanceId' \
+                  | sort \
+                > asg-instances.txt
+
+                # Find those only appearing in the ASG list
+                INSTANCES_REMOVED=$(comm -23 asg-instances.txt bosh-instances.txt)
+
+                # Find those only appering in the Bosh list
+                INSTANCES_ADDED=$(comm -13 asg-instances.txt bosh-instances.txt)
+
+                # Find those unchanged
+                INSTANCES_UNCHANGED=$(comm -12 asg-instances.txt bosh-instances.txt)
+
+                for id in $INSTANCES_UNCHANGED; do
+                  echo "UNCHANGED ${id}"
+                done;
+
+                for id in $INSTANCES_REMOVED; do
+                  echo "DETACH    ${id}"
+                  aws autoscaling detach-instances \
+                    --auto-scaling-group-name "${ASG_NAME}" \
+                    --instance-ids "${id}" \
+                    --should-decrement-desired-capacity;
+                done;
+
+                for id in $INSTANCES_ADDED; do
+                  echo "ATTACH    ${id}"
+                  aws autoscaling attach-instances \
+                    --auto-scaling-group-name ${ASG_NAME} \
+                    --instance-ids "${id}";
+                done;
+
       - task: copy-cf-secrets-to-concourse-credhub-ns
         tags: [colocated-with-web]
         config:
