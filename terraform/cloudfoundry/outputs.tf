@@ -206,3 +206,7 @@ output "paas_admin_metrics_aws_secret_access_key" {
   sensitive = true
   value     = "${aws_iam_access_key.paas_admin_metrics.secret}"
 }
+
+output "routers_asg_name" {
+  value = "${aws_autoscaling_group.routers_asg.name}"
+}
